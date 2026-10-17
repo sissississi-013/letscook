@@ -9,7 +9,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - [x] M4 Grab anything
 - [x] M5 Cooking state
 - [x] M6 Cutting
-- [ ] M7 Session logging for robots
+- [x] M7 Session logging for robots
 - [ ] M8 Plate it → Claude names it
 - [ ] M9 Ask for any tool
 - [ ] M10 Polish + README
@@ -60,3 +60,10 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `KnifeEdge.cs`: a blade hit faster than 0.3 m/s splits food along the food axis that best matches the blade normal. Each half gets half the mass, its own copy of the cooking state, and the next cut name (whole → halves → quarters → chunks → small pieces → minced). Stops below 8 mm thickness or at 40 pieces; 0.25 s cooldown.
 - `CookEvents.cs`: ordered event history (grab, release, cut) for the robot logger and the dish summary. HandGrasp now emits grab/release.
 - Evidence: PlayMode 5/5, including `FastChopSplitsFoodInHalf` (1.2 m/s → 2 pieces "halves", 0.06 kg each, split across x, separate states, cut event logged) and `GentleTouchDoesNotCut` (0.1 m/s → still 1 piece). EditMode 11/11.
+
+### 15:12 M7 Session logging for robots ✅
+- `SessionLogger.cs` (in the scene) writes `sessions/unity-<time>.jsonl` at 30 fps: meta line (keypoint order, frame convention), per-frame wrists + rotation, 21 MediaPipe-order keypoints per hand, 19 raw glove joint rotations, curls, held object id, assisted flag, live-vs-mock flag, every object's pose + food state (cut, doneness, temps, browning, char, set, melted), pan temperature; event lines (grab, release, cut, ...).
+- `tools/to_lerobot.py`: Unity session → LeRobot v2.1-layout dataset (parquet per episode + meta/info.json, episodes.jsonl, tasks.jsonl). Converts to right-handed Z-up (tested: rotations stay proper, up stays up). `observation.state` (140) = per hand wrist pos + quat + 21 wrist-frame keypoints; `action` = next frame; plus world keypoints, object poses, held object, `quality.assist_active`, `quality.tracking_ok`, `quality.glove_live`, food-state labels. Episodes split at `plate` events. LeRobot's own v2.1→v3 script can upgrade it.
+- **Claude's call:** v2.1 layout instead of writing v3 directly (simpler, and LeRobot ships the upgrade script). Raw rotations are Rokoko world rotations, not local.
+- Evidence: PlayMode 6/6 (logger writes about 30 fps, objects, doneness, cut event); pytest 15/15 (basis change, quaternion round trip, fixture conversion, untracked frames are NaN, plate splits episodes). Fixture: `tests/fixtures/sample-session.jsonl` (mock hands).
+- Not yet: rendered video, fingertip contact ids, MANO fitting, retargeting.

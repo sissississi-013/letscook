@@ -46,6 +46,10 @@ namespace LetsCook.EditorTools
             var wrists = rig.AddComponent<WristController>();
             wrists.left = MakeHand(rig.transform, receiver, "Left", LeftWrist);
             wrists.right = MakeHand(rig.transform, receiver, "Right", RightWrist);
+            var logger = rig.AddComponent<SessionLogger>();
+            logger.receiver = receiver;
+            logger.left = wrists.left.parent.Find("Left Hand").GetComponent<GloveHand>();
+            logger.right = wrists.right.parent.Find("Right Hand").GetComponent<GloveHand>();
 
             Kitchen.Build();
             rig.AddComponent<GameHud>().receiver = receiver;
