@@ -17,6 +17,8 @@ Full checklist: [glove-setup.md](glove-setup.md). In short:
    - port **14045** (Unity)
 3. Enable both and click **Activate** (needs the Plus/Pro plan or trial).
 
+**Check the gloves before playing:** `.venv/bin/python glove_check.py` shows a live bar per finger (0 = straight, 1 = fist). Make a fist, open your hand, point: the bars should follow.
+
 If no stream arrives for 2 s, the game plays a built-in hand animation, and the top-left status says "mock hands".
 
 ## 3. Play
