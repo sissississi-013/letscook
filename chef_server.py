@@ -6,11 +6,13 @@ POST /dish   {"summary": {...}, "screenshot_b64": "<png base64, optional>"}
              → {"dish_name", "course", "description", "chef_note", "unlock": {...}, "offline": bool}
 POST /tool   {"request": "a mortar and pestle"}
              → {"source": "library" | "claude" | "offline", "tool": {name, mass_kg, abilities, parts: [...]}}
-GET  /cookbook → every dish so far (cookbook.json)
+GET  /cookbook → every dish so far (cookbook.json); cookbook/index.html is the readable page with photos
 
 The API key stays here (ANTHROPIC_API_KEY from the environment); Unity never sees it.
 If Claude can't be reached, a simple offline name is returned so the game never blocks.
 """
+import base64
+import html
 import json
 import sys
 import time
@@ -192,11 +194,57 @@ def load_cookbook():
         return []
 
 
-def save_dish(entry):
+COOKBOOK_PAGE = ROOT / "cookbook" / "index.html"
+
+
+def save_dish(entry, screenshot_b64=None):
     book = load_cookbook()
+    if screenshot_b64:
+        photos = COOKBOOK_PAGE.parent / "photos"
+        photos.mkdir(parents=True, exist_ok=True)
+        name = f"dish-{len(book) + 1:03d}.png"
+        try:
+            (photos / name).write_bytes(base64.b64decode(screenshot_b64))
+            entry["photo"] = f"photos/{name}"
+        except (ValueError, OSError) as e:
+            print(f"[chef] couldn't save photo: {e}", file=sys.stderr)
     book.append(entry)
     COOKBOOK.write_text(json.dumps(book, indent=2))
+    write_cookbook_page(book)
     return len(book)
+
+
+def write_cookbook_page(book):
+    """A personal cookbook: one card per dish, newest first, with the plate photo and what it unlocked."""
+    def esc(x):
+        return html.escape(str(x or ""))
+    cards = []
+    for i, d in reversed(list(enumerate(book, start=1))):
+        dish = d["dish"]
+        unlock = dish.get("unlock") or {}
+        ingredients = ", ".join(f"{esc(p.get('ingredient'))} <span>({esc(p.get('doneness'))})</span>" for p in d["summary"].get("plate", []))
+        photo = f'<img src="{esc(d["photo"])}" alt="{esc(dish.get("dish_name"))}">' if d.get("photo") else '<div class="nophoto">no photo</div>'
+        cards.append(f"""<article>{photo}<div class="body">
+<p class="meta">No. {i} · {esc(dish.get('course'))} · {esc(d.get('time'))}{' · offline name' if dish.get('offline') else ''}</p>
+<h2>{esc(dish.get('dish_name'))}</h2><p>{esc(dish.get('description'))}</p>
+<p class="note">{esc(dish.get('chef_note'))}</p><p class="ing">{ingredients}</p>
+<p class="unlock"><b>Unlocked:</b> {esc(unlock.get('recipe_name'))} ({esc(unlock.get('course'))}). {esc(unlock.get('first_step'))}</p>
+</div></article>""")
+    page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Cookbook</title><style>
+:root{{--bg:#f7f0e3;--ink:#3a2a1c;--muted:#7a6650;--card:#fffaf1;--accent:#c4572e;--line:#e6d8c2}}
+@media (prefers-color-scheme: dark){{:root{{--bg:#1f1a15;--ink:#f1e6d6;--muted:#b8a58c;--card:#2a231c;--accent:#e98a5f;--line:#3d342a}}}}
+body{{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,serif}}
+header{{padding:40px 16px 8px;max-width:980px;margin:auto}} h1{{margin:0;font-size:40px}} header p{{color:var(--muted);margin:4px 0 0}}
+main{{max-width:980px;margin:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:20px}}
+article{{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}}
+img,.nophoto{{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--line)}} .nophoto{{display:grid;place-items:center;color:var(--muted)}}
+.body{{padding:14px 16px 16px}} h2{{margin:2px 0 6px;font-size:22px;color:var(--accent)}} .meta{{margin:0;font:12px system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}}
+.note{{font-style:italic}} .ing{{font:13px system-ui;color:var(--muted)}} .ing span{{opacity:.8}} .unlock{{font:14px system-ui;border-top:1px dashed var(--line);padding-top:8px}}
+</style></head><body><header><h1>My Cookbook</h1><p>{len(book)} dish{'es' if len(book) != 1 else ''} cooked with let's cook!</p></header>
+<main>{''.join(cards)}</main></body></html>"""
+    COOKBOOK_PAGE.parent.mkdir(parents=True, exist_ok=True)
+    COOKBOOK_PAGE.write_text(page)
 
 
 def history_for_prompt(book, limit=10):
@@ -248,7 +296,7 @@ def name_dish(summary, screenshot_b64=None, client=None):
     except (anthropic.APIError, RuntimeError, StopIteration, json.JSONDecodeError) as e:
         print(f"[chef] offline fallback: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
         dish = offline_dish(summary)
-    count = save_dish({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "summary": summary, "dish": dish})
+    count = save_dish({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "summary": summary, "dish": dish}, screenshot_b64)
     dish["cookbook_count"] = count
     return dish
 

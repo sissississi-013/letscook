@@ -45,6 +45,8 @@ If no stream arrives for 2 s, the game plays a built-in hand animation, and the 
 | Enter | **serve** what's on the plate → Claude names it and unlocks a recipe |
 | Esc | close the dish card |
 
+Your **cookbook**: every served dish is saved with a photo. Open it with `open cookbook/index.html`.
+
 How to cook:
 - **Grab:** pinch the thumb and a finger around something (or close your hand on it). Open your fingers to let go.
 - **Cut:** chop food fast with the knife (or any tool with a blade).

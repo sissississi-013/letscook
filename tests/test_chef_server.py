@@ -36,6 +36,7 @@ DISH = {"dish_name": "Sunrise Butter Toast", "course": "breakfast", "description
 @pytest.fixture(autouse=True)
 def temp_cookbook(tmp_path, monkeypatch):
     monkeypatch.setattr(chef_server, "COOKBOOK", tmp_path / "cookbook.json")
+    monkeypatch.setattr(chef_server, "COOKBOOK_PAGE", tmp_path / "cookbook" / "index.html")
 
 
 def test_names_dish_and_saves_to_cookbook():
@@ -80,3 +81,16 @@ def test_offline_fallback_when_api_fails():
 def test_schema_requires_every_field():
     assert set(chef_server.SCHEMA["required"]) == set(chef_server.SCHEMA["properties"])
     assert chef_server.SCHEMA["additionalProperties"] is False
+
+
+PNG_1PX = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+
+
+def test_cookbook_page_has_photo_and_escapes_names(tmp_path):
+    evil = dict(DISH, dish_name="<script>alert(1)</script> Toast")
+    chef_server.name_dish(SUMMARY, screenshot_b64=PNG_1PX, client=fake_client(reply=evil))
+    page = (tmp_path / "cookbook" / "index.html").read_text()
+    assert "&lt;script&gt;" in page and "<script>" not in page
+    assert 'src="photos/dish-001.png"' in page
+    assert (tmp_path / "cookbook" / "photos" / "dish-001.png").read_bytes()[:4] == b"\x89PNG"
+    assert "Unlocked:" in page and "Eggy Bread" in page

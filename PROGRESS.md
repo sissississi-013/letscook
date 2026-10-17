@@ -97,3 +97,8 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - **Claude's call:** pose wrists instead of hand landmarks (hand tracking struggles with gloves); default scale 1.2.
 - Fixed two flaky tests (plate test moved an interpolated body via transform; wrist test counted frames instead of time).
 - Evidence: pytest 31/31 (mapping directions, scale, calibration, packet). PlayMode 10/10 incl. `CameraPacketsGlideTheWristsAndPauseKeyboard`. MediaPipe 1.1.1 runs here (10 frames in 0.1 s on a blank image). **Not yet tested with a real camera**: needs the user to allow camera access.
+
+### 16:02 Contacts for robot data + personal cookbook ✅
+- `HandGrasp.Contacts`: the object each fingertip and the palm is touching every physics step. Logged per frame as `contacts` (object ids), exported as `observation.contacts` (2×6 int16). Fixture regenerated.
+- `chef_server.py` saves each plate's screenshot to `cookbook/photos/` and rebuilds `cookbook/index.html` (one card per dish, newest first: photo, number, course, time, name, description, chef note, ingredients with doneness, what it unlocked; light/dark theme; names HTML-escaped). `cookbook/` is git-ignored (personal).
+- Evidence: pytest 32/32 (incl. photo saved as PNG + script-injection escape), Unity 25/25. Rendered sample page checked visually.
