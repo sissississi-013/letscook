@@ -12,7 +12,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - [x] M7 Session logging for robots
 - [ ] M8 Plate it → Claude names it
 - [ ] M9 Ask for any tool
-- [ ] M10 Polish + README
+- [x] M10 Polish + README
 
 ## Decisions (Claude's calls, not yet confirmed by the user)
 - Unity 6 (6000.2.9f1) with a custom C# receiver instead of the Rokoko plugin
@@ -67,3 +67,8 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - **Claude's call:** v2.1 layout instead of writing v3 directly (simpler, and LeRobot ships the upgrade script). Raw rotations are Rokoko world rotations, not local.
 - Evidence: PlayMode 6/6 (logger writes about 30 fps, objects, doneness, cut event); pytest 15/15 (basis change, quaternion round trip, fixture conversion, untracked frames are NaN, plate splits episodes). Fixture: `tests/fixtures/sample-session.jsonl` (mock hands).
 - Not yet: rendered video, fingertip contact ids, MANO fitting, retargeting.
+
+### 15:21 M10 Polish + README ✅
+- `HOW-TO-RUN.md` (helpers, Studio receivers, controls, how to cook, robot data export, dev commands, troubleshooting), `start.sh` (logger + chef server, `--mock`; skips anything already running; Ctrl+C stops what it started), README updated.
+- Evidence: `./start.sh --mock` started the chef server (health OK, /tool returned the library whisk) and fake gloves, detected the logger already running, and cleaned up on stop.
+- Note: that test briefly sent mock frames into the real logger's current session file (`sessions/20261017-145204.jsonl`); they're marked "Mock Newton".
