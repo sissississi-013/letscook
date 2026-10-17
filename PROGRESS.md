@@ -8,7 +8,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - [x] M3 Kitchen
 - [x] M4 Grab anything
 - [x] M5 Cooking state
-- [ ] M6 Cutting
+- [x] M6 Cutting
 - [ ] M7 Session logging for robots
 - [ ] M8 Plate it → Claude names it
 - [ ] M9 Ask for any tool
@@ -49,9 +49,14 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - Fixed the mock thumb (was on the outer side and never met the index); pinch gap now under 1.5 cm on both hands (pytest 10/10).
 - Evidence: PlayMode `PinchGrabsLiftsAndReleases` passes (open → no grab; pinch → grabs cube; hand rises 12 cm → cube rises > 8 cm; open → released and falls). Unity tests: EditMode 4/4, PlayMode 2/2.
 
-### 15:16 M5 Cooking state ✅
+### 15:08 M5 Cooking state ✅
 - `FoodState.cs` (pure C#): surface + core temperature, surface water that pins the surface at 100 °C until it boils off (no browning on wet food), Maillard browning above 140 °C, char above 180 °C, protein set (egg 62 °C, onion softens 85 °C), butter melt (32 °C). Colour and a plain-language `Doneness` ("fully set, lightly browned") come from the state. Per-ingredient profiles for tomato, onion, egg, butter, bread.
 - `Food.cs` runs the state, heats from touching `Cookware`, recolours, flattens melting butter, `Describe()` for the dish summary. `Food.TimeScale` (1 = real time).
 - `Cookware.cs`: pan preheats toward the burner's target (260 °C at full power, about a 1–2 min preheat) and cools in air. `Burner`: B toggles, +/- heat level, ring glows.
 - Bug found and fixed: sleeping rigidbodies stop reporting contacts, so food silently stopped cooking. Food stays awake.
 - Evidence: EditMode 11/11 (raw stays raw; tomato pinned at 100 °C; bread golden at about 2.5 min, not at 30 s; burns at 260 °C for 10 min; egg sets at 160 °C; butter melts; colour darkens). PlayMode 3/3, including kitchen integration (pan > 150 °C, bread browns, butter melts, tomato on the board stays raw). `shots/m5-cooked.png`.
+
+### 15:09 M6 Cutting ✅
+- `KnifeEdge.cs`: a blade hit faster than 0.3 m/s splits food along the food axis that best matches the blade normal. Each half gets half the mass, its own copy of the cooking state, and the next cut name (whole → halves → quarters → chunks → small pieces → minced). Stops below 8 mm thickness or at 40 pieces; 0.25 s cooldown.
+- `CookEvents.cs`: ordered event history (grab, release, cut) for the robot logger and the dish summary. HandGrasp now emits grab/release.
+- Evidence: PlayMode 5/5, including `FastChopSplitsFoodInHalf` (1.2 m/s → 2 pieces "halves", 0.06 kg each, split across x, separate states, cut event logged) and `GentleTouchDoesNotCut` (0.1 m/s → still 1 piece). EditMode 11/11.

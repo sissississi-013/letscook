@@ -120,6 +120,7 @@ namespace LetsCook
             joint.connectedBody = grip;
             joint.breakForce = breakForce;
             GameHud.Toast($"{hand.side.ToLower()} hand grabbed the {NameOf(target)}", 1.5f);
+            CookEvents.Emit("grab", NameOf(target), hand.side);
             Grabbed?.Invoke(this, target);
         }
 
@@ -139,7 +140,11 @@ namespace LetsCook
                     if (theirs != null) Physics.IgnoreCollision(mine, theirs, false);
             ignored.Clear();
             gripFingers.Clear();
-            if (was != null) Released?.Invoke(this, was);
+            if (was != null)
+            {
+                CookEvents.Emit("release", NameOf(was), $"{hand.side} {why}");
+                Released?.Invoke(this, was);
+            }
         }
 
         Vector3 GripPoint()

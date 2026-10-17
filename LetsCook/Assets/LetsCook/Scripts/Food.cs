@@ -9,6 +9,7 @@ namespace LetsCook
         public string ingredient;
         public string cut = "whole";   // whole, half, slice, piece...
         public FoodState state;
+        [System.NonSerialized] public float cutCooldownUntil;
         public static readonly List<Food> All = new List<Food>();
         public static float TimeScale = 1f;   // 1 = real time; raise for faster demos
 
@@ -30,6 +31,7 @@ namespace LetsCook
         {
             if (state == null) Init(ingredient);
             rend = GetComponent<Renderer>();
+            mat = null;   // a cut copy must not share its parent's material instance
             baseScale = transform.localScale;
             // Sleeping bodies stop reporting contacts, which would silently stop the cooking.
             if (TryGetComponent<Rigidbody>(out var rb)) rb.sleepThreshold = 0f;

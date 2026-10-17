@@ -58,6 +58,8 @@ namespace LetsCook
             peakSurface = p.startTemp;
         }
 
+        public FoodState Clone() => (FoodState)MemberwiseClone();
+
         /// contactTemp: temperature of a hot surface the food is touching, or null if only air.
         public void Step(float dt, float? contactTemp)
         {
