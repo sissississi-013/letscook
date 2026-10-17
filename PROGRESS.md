@@ -141,3 +141,9 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `KitchenReset.cs`: **R** releases held objects, clears requested tools, food pieces, spilled eggs and shells, rebuilds the kitchen, re-points plating at the new plate, emits `reset`. `to_lerobot.py` now also splits episodes at `reset`.
 - Voice for tool requests: the T text box accepts macOS dictation (Fn twice), documented. **Claude's call:** dictation instead of a custom speech pipeline (no extra install or permission).
 - Evidence: PlayMode 17/17 incl. `ResetGivesAFreshKitchen`; pytest 34/34.
+
+### 16:45 Visual upgrade + robot-hand retargeting ✅
+- **Visuals** (user feedback: "the modeling is SOOOO BAD"): CC0 Poly Haven photo textures (counter stone tiles, wood floor, oak cutting board, with normal maps), smooth lathe-turned meshes replacing primitives (cast-iron pan with flared wall + rim, glazed bowl, rimmed plate, glass oil bottle, shakers, egg-shaped egg, lobed tomato with stem, onion), painted wall, warm key light + cool fill + trilight ambient + realtime reflection probe, very-high soft shadows, 4× MSAA. Hands are fuller: tapered fingers, thicker thumb, a palm. Physics colliders unchanged (visual meshes only). `shots/m13-visuals.png`.
+- **Retargeting**: `tools/retarget.py` (separate `.venv-robot`, Python 3.12, dex_retargeting + CPU torch; LEAP URDF from dexsuite/dex-urdf, MIT) adds `action.retargeted.leap_left/right` (16 joints) per frame, using dex-retargeting's own frame estimate + MANO operator rotation and DexPilot config.
+- Evidence: Unity tests pass; `tests_robot` 2/2 (frame orthonormal + right-handed; fist bends the LEAP joints more than an open hand).
+- Gloves: Studio detects **both gloves over USB** ("Device is not yet connected to Wi-Fi"); user is updating Studio to 2.6.2.7 and doing Wi-Fi setup.

@@ -66,6 +66,14 @@ Every Play session writes `sessions/unity-<time>.jsonl` (30 fps: hands, objects,
 ```
 Episodes are split each time you serve a plate or reset the kitchen. Frames where the game held an object for you are flagged (`quality.assist_active`), and so are frames driven by mock hands (`quality.glove_live = false`).
 
+Retarget the hands onto a robot hand (LEAP by default; also allegro, shadow, inspire, ability, svh):
+```bash
+uv venv -p 3.12 .venv-robot && VIRTUAL_ENV=.venv-robot uv pip install dex_retargeting torch numpy pyarrow
+git clone --depth 1 --filter=blob:none --sparse https://github.com/dexsuite/dex-urdf models/dex-urdf && git -C models/dex-urdf sparse-checkout set robots/hands/leap_hand
+.venv-robot/bin/python tools/retarget.py datasets/letscook-001
+```
+This adds `action.retargeted.leap_left` / `leap_right` (16 joint angles each) to every episode.
+
 ## Developer commands
 ```bash
 ./unity.sh build                    # rebuild the Kitchen scene from code
