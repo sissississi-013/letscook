@@ -156,6 +156,15 @@ namespace LetsCook
                 var item = grasp.Held.GetComponentInParent<KitchenItem>();
                 if (item != null) held = Id(item);
             }
+            sb.Append(",\"contacts\":[");
+            for (int i = 0; i < 6; i++)
+            {
+                if (i > 0) sb.Append(',');
+                var rb = grasp != null ? grasp.Contacts[i] : null;
+                var touched = rb != null ? rb.GetComponentInParent<KitchenItem>() : null;
+                sb.Append(touched != null ? Id(touched) : -1);
+            }
+            sb.Append(']');
             sb.Append(",\"held\":").Append(held).Append(",\"assisted\":").Append(grasp != null && grasp.Assisted ? "true" : "false");
             sb.Append('}');
         }

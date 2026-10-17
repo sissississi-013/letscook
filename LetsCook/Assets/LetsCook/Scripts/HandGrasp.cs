@@ -18,6 +18,9 @@ namespace LetsCook
         public float breakForce = 250f;
 
         public Rigidbody Held { get; private set; }
+        /// What each fingertip (thumb → little) and the palm (index 5) is touching this physics step, or null.
+        public readonly Rigidbody[] Contacts = new Rigidbody[6];
+        public float contactRadius = 0.013f;
         public bool Assisted => Held != null;
         public string HeldName => Held != null ? NameOf(Held) : null;
         public static event Action<HandGrasp, Rigidbody> Grabbed, Released;
@@ -70,13 +73,13 @@ namespace LetsCook
             if (!hand.HasPose) return;
             bool solid = hand.receiver == null || hand.receiver.DrivesPhysics;
             if (solid != Solid) SetSolid(solid);
-            if (!solid) return;
+            if (!solid) { System.Array.Clear(Contacts, 0, Contacts.Length); return; }
             if (Held == null || joint == null) { if (Held != null) Release("joint broke"); TryGrab(); }
             else MaybeRelease();
 
             for (int f = 1; f <= 5; f++)
-                if (TipPosition(f, out var p)) tips[f - 1].MovePosition(p);
-            if (PalmPosition(out var palmPos)) palm.MovePosition(palmPos);
+                if (TipPosition(f, out var p)) { tips[f - 1].MovePosition(p); Contacts[f - 1] = FirstNear(p, contactRadius); }
+            if (PalmPosition(out var palmPos)) { palm.MovePosition(palmPos); Contacts[5] = FirstNear(palmPos, 0.032f); }
             if (Held != null && WristPosition(out var w))
             {
                 // Follow the wrist rigidly from where the object was grabbed: finger re-curls must not yank it.
@@ -176,6 +179,17 @@ namespace LetsCook
             foreach (int f in gripFingers)
                 if (TipPosition(f, out var p)) { sum += p; n++; }
             return sum / n;
+        }
+
+        Rigidbody FirstNear(Vector3 p, float radius)
+        {
+            int count = Physics.OverlapSphereNonAlloc(p, radius, hits, ~0, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < count; i++)
+            {
+                var rb = hits[i].attachedRigidbody;
+                if (rb != null && !rb.isKinematic && rb.GetComponentInParent<KitchenItem>() != null) return rb;
+            }
+            return null;
         }
 
         List<Rigidbody> BodiesNear(Vector3 p)

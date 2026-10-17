@@ -59,6 +59,8 @@ def test_convert_fixture(tmp_path):
     episodes = [json.loads(l) for l in (tmp_path / "meta" / "episodes.jsonl").read_text().splitlines()]
     assert any(e["event"] == "cut" for e in episodes[0]["events"])
     assert "tomato" in info["features"]["observation.environment_state"]["names"]
+    contacts = np.array(table.column("observation.contacts").to_pylist())
+    assert contacts.shape[1] == 12 and contacts.min() >= -1
 
 
 def test_plate_event_splits_episodes(tmp_path):

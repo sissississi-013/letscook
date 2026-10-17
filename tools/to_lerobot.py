@@ -122,17 +122,18 @@ def convert(session_path, out_dir, task="free play cooking"):
     episodes_meta, index = [], 0
     for ep_idx, ep in enumerate(split_episodes(frames, events)):
         t0 = ep[0]["t"]
-        states, kp_world, held, assisted, tracked, env, labels = [], [], [], [], [], [], []
+        states, kp_world, held, assisted, tracked, env, labels, contacts = [], [], [], [], [], [], [], []
         for fr in ep:
-            s, k, h_held, h_assist, h_ok = [], [], [], [], []
+            s, k, h_held, h_assist, h_ok, h_contacts = [], [], [], [], [], []
             for side in SIDES:
                 hand = fr["hands"].get(side)
                 st, kw, ok = hand_state(hand)
                 s.append(st); k.append(kw); h_ok.append(ok)
                 h_held.append(hand.get("held", -1) if ok else -1)
                 h_assist.append(bool(hand.get("assisted", False)) if ok else False)
+                h_contacts.append(list(hand.get("contacts", [-1] * 6)) if ok else [-1] * 6)
             states.append(np.concatenate(s)); kp_world.append(np.stack(k))
-            held.append(h_held); assisted.append(h_assist); tracked.append(h_ok)
+            held.append(h_held); assisted.append(h_assist); tracked.append(h_ok); contacts.append([c for hc in h_contacts for c in hc])
             pose = np.full((K, 7), np.nan)
             for o in fr["objects"]:
                 pose[o["id"]] = np.concatenate([to_world_pos(o["pos"]), mat_to_quat(to_world_rot(o["rot"]))])
@@ -153,6 +154,7 @@ def convert(session_path, out_dir, task="free play cooking"):
             "observation.state.hand_keypoints": pa.array([k.reshape(-1).astype(np.float32) for k in kp_world], pa.list_(pa.float32(), 126)),
             "observation.environment_state": pa.array([e.astype(np.float32) for e in env], pa.list_(pa.float32(), K * 7)),
             "observation.held_object": pa.array(held, pa.list_(pa.int16(), 2)),
+            "observation.contacts": pa.array(contacts, pa.list_(pa.int16(), 12)),
             "quality.assist_active": pa.array(assisted, pa.list_(pa.bool_(), 2)),
             "quality.tracking_ok": pa.array(tracked, pa.list_(pa.bool_(), 2)),
             "quality.glove_live": pa.array([bool(fr.get("live")) for fr in ep], pa.bool_()),
@@ -194,6 +196,7 @@ def convert(session_path, out_dir, task="free play cooking"):
             "observation.state.hand_keypoints": {"dtype": "float32", "shape": [2, 21, 3], "names": ["hand", "keypoint (MediaPipe order)", "xyz"], "note": "world frame"},
             "observation.environment_state": {"dtype": "float32", "shape": [K, 7], "names": [object_names.get(i, f"obj{i}") for i in range(K)], "note": "NaN when the object doesn't exist yet (e.g. a later cut piece)"},
             "observation.held_object": {"dtype": "int16", "shape": [2], "note": "object id per hand, -1 = none"},
+            "observation.contacts": {"dtype": "int16", "shape": [2, 6], "names": ["hand", "thumb, index, middle, ring, little, palm"], "note": "object id touched, -1 = none"},
             "quality.assist_active": {"dtype": "bool", "shape": [2], "note": "game attached the object (assisted grasp): motion is less physically valid"},
             "quality.tracking_ok": {"dtype": "bool", "shape": [2]},
             "quality.glove_live": {"dtype": "bool", "shape": [1], "note": "false = built-in mock animation, not a human"},

@@ -53,6 +53,7 @@ namespace LetsCook.Tests
             Assert.That(frame, Does.Contain("\"Left\":{\"ok\":true"));
             Assert.That(frame, Does.Contain("\"name\":\"tomato\""));
             Assert.That(frame, Does.Contain("\"doneness\":\"raw\""));
+            Assert.That(frame, Does.Contain("\"contacts\":["));
             Assert.IsTrue(lines.Any(l => l.Contains("\"event\":\"cut\"")));
 
             // Keep one session as a fixture for the Python converter tests.
