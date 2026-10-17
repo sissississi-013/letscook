@@ -33,6 +33,7 @@ If no stream arrives for 2 s, the game plays a built-in hand animation, and the 
 ## 3. Play
 1. Open Unity Hub → **Add** → `~/let's cook!/LetsCook` → open with **6000.2.9f1**.
 2. Open `Assets/Scenes/Kitchen.unity` and press **Play**.
+3. The game first asks whether to record: **Y** saves hand motion + videos for robot research, **N** just plays. (The separate `receiver.py` glove logger records raw glove data whenever it runs, so stop it for players who said no.)
 
 | Key | What it does |
 |---|---|

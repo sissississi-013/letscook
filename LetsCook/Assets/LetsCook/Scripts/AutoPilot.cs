@@ -22,6 +22,8 @@ namespace LetsCook
             float.TryParse(Arg(args, "-autoquit") ?? "0", System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out quitAfter);
             cook = Array.IndexOf(args, "-autocook") >= 0;
             if (shotDir == null && quitAfter <= 0f) { enabled = false; return; }
+            var consent = FindFirstObjectByType<Consent>();
+            if (consent != null && !consent.Answer.HasValue) consent.Decide(true);   // autopilot runs are test recordings
             StartCoroutine(Run());
         }
 

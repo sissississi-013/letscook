@@ -115,4 +115,10 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 ### 16:09 Robot-data video ✅
 - `SessionVideo.cs`: each logged frame renders the player's camera (**ego**) and a fixed side camera (**agentview**, disabled until needed) at 424×240 and pipes raw RGB into ffmpeg (`h264_videotoolbox`) on a background thread → `sessions/unity-<id>-video/{ego,agentview}.mp4`. Each log frame carries `video_frame`; meta lists `videos` and `video_dir`. Without ffmpeg, video is skipped.
 - `tools/to_lerobot.py` cuts each episode's frame range into `videos/chunk-000/observation.images.<view>/episode_XXXXXX.mp4` and adds the video features + `video_path` to info.json.
-- Evidence: PlayMode 13/13 (video files exist, frame-aligned); ffprobe: 73 video frames for 73 log frames, 424×240; extracted frame shows the kitchen upright. pytest 34/34 incl. `test_videos_are_cut_per_episode` (clip frames == data frames). Fixture video in `tests/fixtures/sample-session-video/`.
+- Evidence: PlayMode 13/13 (video files exist, frame-aligned); ffprobe: 73 video frames for 73 log frames, 424×240; extracted frame shows the kitchen upright. pytest 33/33 incl. `test_videos_are_cut_per_episode` (clip frames == data frames). Fixture video in `tests/fixtures/sample-session-video/`.
+
+### 16:12 Real-app perf check + consent ✅
+- Built app with video on: **29.9 fps logged, 322 log frames = 322 ego frames = 322 agentview frames** over about 11 s, live mock stream the whole time.
+- `Consent.cs`: before anything is recorded, an overlay explains what's saved (hand motion, kitchen, two counter videos; no camera image of the player; stays local unless shared as an open dataset; deletion on request). **Y** enables the SessionLogger, **N** plays without recording. The logger is saved disabled in the scene, so no file exists before consent. `-consent yes|no` skips the question; autopilot runs count as yes. HUD shows "● recording" / "not recording".
+- **Claude's call:** consent wording (draft; organizers should review it, see research/robot-data.md §7). `receiver.py` still records raw glove data whenever it runs (documented).
+- Evidence: PlayMode 14/14 incl. `NothingIsRecordedUntilThePlayerAgrees`; scene file has the logger `m_Enabled: 0`.

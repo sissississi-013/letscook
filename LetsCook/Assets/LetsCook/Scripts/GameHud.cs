@@ -10,6 +10,7 @@ namespace LetsCook
         static readonly List<(string text, float until)> toasts = new List<(string, float)>();
         GUIStyle style, toastStyle;
         WristCamInput cam;
+        SessionLogger logger;
 
         public static void Toast(string text, float seconds = 3f)
         {
@@ -28,6 +29,8 @@ namespace LetsCook
             string status = receiver != null ? receiver.Status : "no receiver";
             if (cam == null) cam = FindFirstObjectByType<WristCamInput>();
             status += cam != null && cam.Active ? "  ·  wrists: webcam" : "  ·  wrists: keyboard";
+            if (logger == null) logger = FindFirstObjectByType<SessionLogger>(FindObjectsInactive.Include);
+            status += logger != null && logger.enabled ? "  ·  ● recording" : "  ·  not recording";
             GUI.Label(new Rect(14, 10, 900, 24), "let's cook!  ·  " + status, style);
             GUI.Label(new Rect(14, 32, 1200, 24), Controls, style);
 

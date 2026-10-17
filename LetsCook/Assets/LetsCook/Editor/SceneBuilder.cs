@@ -66,6 +66,8 @@ namespace LetsCook.EditorTools
             video.agent = agentCam;
             var logger = rig.AddComponent<SessionLogger>();
             logger.video = video;
+            logger.enabled = false;   // nothing is written until the player agrees (Consent)
+            rig.AddComponent<Consent>().logger = logger;
             logger.receiver = receiver;
             logger.left = wrists.left.parent.Find("Left Hand").GetComponent<GloveHand>();
             logger.right = wrists.right.parent.Find("Right Hand").GetComponent<GloveHand>();
