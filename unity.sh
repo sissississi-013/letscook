@@ -1,7 +1,7 @@
 #!/bin/bash
 # Batch-mode helpers for the LetsCook Unity project.
 #   ./unity.sh build              rebuild Assets/Scenes/Kitchen.unity from code
-#   ./unity.sh shot <pose> <name> render shots/<name>.png with a mock pose (open|fist|pinch|point)
+#   ./unity.sh shot <pose> <name> [yes] render (yes = stage cooked food) shots/<name>.png with a mock pose (open|fist|pinch|point)
 #   ./unity.sh test               run EditMode tests → logs/tests.xml
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -26,7 +26,7 @@ case "${1:-}" in
     "$UNITY" -batchmode -quit -projectPath "$PROJECT" -executeMethod LetsCook.EditorTools.SceneBuilder.Build -logFile logs/build.log || { check logs/build.log; tail -20 logs/build.log; exit 1; }
     check logs/build.log; grep "\[let's cook\]" logs/build.log ;;
   shot)
-    "$UNITY" -batchmode -quit -projectPath "$PROJECT" -executeMethod LetsCook.EditorTools.SceneBuilder.Shot -shotPose "${2:-pinch}" -shotName "${3:-shot}" -logFile logs/shot.log || { check logs/shot.log; tail -20 logs/shot.log; exit 1; }
+    "$UNITY" -batchmode -quit -projectPath "$PROJECT" -executeMethod LetsCook.EditorTools.SceneBuilder.Shot -shotPose "${2:-pinch}" -shotName "${3:-shot}" -shotCook "${4:-no}" -logFile logs/shot.log || { check logs/shot.log; tail -20 logs/shot.log; exit 1; }
     check logs/shot.log; grep "\[let's cook\]" logs/shot.log ;;
   test)
     rm -f logs/tests-*.xml

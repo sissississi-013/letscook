@@ -37,6 +37,7 @@ namespace LetsCook
             var ring = Disc(burner.transform, "Burner Ring", Vector3.zero, 0.075f, 0.002f, Mat("burnerRing", new Color(0.35f, 0.08f, 0.05f), 0.5f));
             ring.transform.localPosition = new Vector3(0f, 0.6f, 0f);
             Object.DestroyImmediate(ring.GetComponent<Collider>());
+            burner.AddComponent<Burner>().ring = ring.GetComponent<Renderer>();
 
             // Tools and containers
             var board = Box(root, "Cutting Board", new Vector3(-0.17f, CounterTop + 0.011f, 0.42f), new Vector3(0.36f, 0.022f, 0.25f), Mat("wood", new Color(0.78f, 0.58f, 0.36f), 0.25f));
@@ -74,6 +75,7 @@ namespace LetsCook
             var handle = Box(pan.transform, "Pan Handle", pos + new Vector3(0.2f, 0.022f, -0.02f), new Vector3(0.17f, 0.014f, 0.024f), Mat("handle", new Color(0.15f, 0.1f, 0.08f), 0.3f));
             handle.transform.rotation = Quaternion.Euler(0f, 10f, 8f);
             Tag(pan, "pan", ItemKind.Container);
+            pan.AddComponent<Cookware>();
             return pan;
         }
 

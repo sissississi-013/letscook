@@ -104,9 +104,33 @@ namespace LetsCook.EditorTools
             receiver.Inject(frame);
             foreach (var hand in UnityEngine.Object.FindObjectsByType<GloveHand>(FindObjectsSortMode.None))
                 hand.Apply(frame);
+            if (Arg("-shotCook", "no") == "yes") StageCookedFood();
             ShotHook?.Invoke();
 
             Capture(Camera.main, name);
+        }
+
+        /// Puts toast and melted butter in the pan and scorches the tomato, to eyeball the colours.
+        static void StageCookedFood()
+        {
+            var pan = UnityEngine.Object.FindFirstObjectByType<Cookware>().transform.position;
+            foreach (var food in UnityEngine.Object.FindObjectsByType<Food>(FindObjectsSortMode.None))
+            {
+                if (food.state == null || food.state.profile == null) food.Init(food.ingredient);
+                var st = food.state;
+                switch (food.ingredient)
+                {
+                    case "bread": st.browning = 0.55f; food.transform.position = pan + new Vector3(-0.03f, 0.02f, 0f); break;
+                    case "butter": st.melted = 0.8f; food.transform.position = pan + new Vector3(0.06f, 0.012f, 0.04f); break;
+                    case "tomato": st.browning = 1f; st.charred = 0.7f; break;
+                    case "onion": st.set = 1f; st.browning = 0.3f; break;
+                }
+                var r = food.GetComponent<Renderer>();
+                var m = new Material(r.sharedMaterial) { color = st.Color };
+                r.sharedMaterial = m;
+                if (food.ingredient == "butter")
+                    food.transform.localScale = Vector3.Scale(food.transform.localScale, new Vector3(1.5f, 0.4f, 1.5f));
+            }
         }
 
         /// Later milestones can stage things (e.g. cook food) before the capture.
