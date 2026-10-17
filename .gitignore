@@ -10,3 +10,4 @@ LetsCook/obj/
 LetsCook/*.csproj
 LetsCook/*.sln
 .DS_Store
+.venv/
