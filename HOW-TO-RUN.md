@@ -75,6 +75,8 @@ Episodes are split each time you serve a plate. Frames where the game held an ob
 `unity.sh` needs the project closed in the Unity Editor (batch mode can't open a project that's already open).
 
 ## Troubleshooting
+- **Real hands point the wrong way** (toward you, sideways or upside down): Studio's "forward" is the direction you faced when calibrating. Face the screen and recalibrate (K or Ctrl+Shift+B in Studio), or hold **Z / C** to turn the hands until fingers point into the kitchen.
+- **Fingers look bent when your hand is flat:** recalibrate; the gloves drift over time.
 - **Status says "mock hands" while Studio streams:** check that the port 14045 receiver is enabled, set to JSON v4 without LZ4, and that macOS allowed Studio on the local network.
 - **Logger shows nothing:** macOS limits UDP packets to 9 KB by default and full-body frames can be bigger. Try the "JSON v4 (LZ4)" format for the 14043 receiver only (the logger can decode it; Unity can't).
 - **Dish names say "offline":** the chef server isn't running, or the API key is invalid (the key in `~/.zshrc` returned 401 on 2026-10-17).
