@@ -21,7 +21,9 @@ namespace LetsCook.Tests
             plating.chefUrl = "http://127.0.0.1:8799/dish";   // nothing listens here → offline card
 
             var bread = Food.All.First(f => f.ingredient == "bread");
-            bread.transform.position = plating.plate.position + Vector3.up * 0.03f;
+            var rb = bread.GetComponent<Rigidbody>();   // interpolated bodies ignore transform writes
+            rb.position = plating.plate.position + Vector3.up * 0.03f;
+            rb.linearVelocity = Vector3.zero;
             bread.state.browning = 0.5f;
             yield return new WaitForSeconds(0.5f);
 

@@ -14,3 +14,4 @@ LetsCook/*.sln
 logs/
 cookbook.json
 build/
+models/

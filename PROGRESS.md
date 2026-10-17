@@ -90,3 +90,10 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `EggCracker.cs`: a whole egg cracks on a hard impact (≥ 0.7 m/s; fingers and other food don't count) or when a knife hits it. The shell splits into two bits and the white + yolk spill onto the first solid surface below (pan, bowl, board, counter) as a new `egg (cracked)` food with its own profile that fries: white goes from glossy translucent to opaque, "fully set" at 62 °C+. Emits a `crack` event ("into the pan").
 - Glove checker: `glove_check.py` (live per-finger curl bars from the logger) added earlier.
 - Evidence: PlayMode 9/9 incl. `GentleSetDownDoesNotCrack` and `DroppedIntoThePanItCracksAndFries` (crack event says "into the pan"; fully set after about 200 s of cooking time). EditMode 15/15.
+
+### 16:00 Webcam wrist tracking ✅ (needs a real camera test)
+- `wrist_cam.py`: MediaPipe **pose** landmarker (body wrists, so gloves shouldn't matter; unconfirmed) on the webcam, auto-calibrates the resting pose to the game's rest anchors, maps camera motion to game coordinates (x/z flipped because the camera faces the player, y up), sends UDP to Unity 14046. Preview window, C recalibrate, Q quit. Downloads `models/pose_landmarker_lite.task` (5.6 MB, git-ignored).
+- Unity `WristCamInput.cs`: glides the wrist anchors to the camera positions (smoothing 14/s, clamped to the kitchen), pauses keyboard movement while fresh, hands back to the keyboard after 0.5 s without packets. HUD shows "wrists: webcam/keyboard".
+- **Claude's call:** pose wrists instead of hand landmarks (hand tracking struggles with gloves); default scale 1.2.
+- Fixed two flaky tests (plate test moved an interpolated body via transform; wrist test counted frames instead of time).
+- Evidence: pytest 31/31 (mapping directions, scale, calibration, packet). PlayMode 10/10 incl. `CameraPacketsGlideTheWristsAndPauseKeyboard`. MediaPipe 1.1.1 runs here (10 frames in 0.1 s on a blank image). **Not yet tested with a real camera**: needs the user to allow camera access.

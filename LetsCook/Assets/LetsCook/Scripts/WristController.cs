@@ -12,6 +12,8 @@ namespace LetsCook
         public Vector3 min = new Vector3(-0.75f, 0.9f, 0.05f);
         public Vector3 max = new Vector3(0.75f, 1.45f, 0.8f);
 
+        /// True while the wrist camera is moving the hands (keyboard movement pauses).
+        [System.NonSerialized] public bool externallyDriven;
         bool both = true;
         bool rightSelected = true;
 
@@ -19,7 +21,7 @@ namespace LetsCook
 
         void Update()
         {
-            if (ToolRequester.Typing) return;
+            if (ToolRequester.Typing || externallyDriven) return;
             if (Input.GetKeyDown(KeyCode.Tab)) { both = false; rightSelected = !rightSelected; GameHud.Toast("moving " + Mode, 1f); }
             if (Input.GetKeyDown(KeyCode.Space)) { both = !both; GameHud.Toast("moving " + Mode, 1f); }
 
@@ -33,11 +35,13 @@ namespace LetsCook
             if (both || rightSelected) Move(right, move, turn);
         }
 
+        public Vector3 Clamp(Vector3 p) =>
+            new Vector3(Mathf.Clamp(p.x, min.x, max.x), Mathf.Clamp(p.y, min.y, max.y), Mathf.Clamp(p.z, min.z, max.z));
+
         void Move(Transform anchor, Vector3 delta, float turn)
         {
             if (anchor == null) return;
-            var p = anchor.position + delta;
-            anchor.position = new Vector3(Mathf.Clamp(p.x, min.x, max.x), Mathf.Clamp(p.y, min.y, max.y), Mathf.Clamp(p.z, min.z, max.z));
+            anchor.position = Clamp(anchor.position + delta);
             anchor.Rotate(0f, turn, 0f, Space.World);
         }
 

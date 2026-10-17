@@ -47,6 +47,7 @@ namespace LetsCook.EditorTools
             var wrists = rig.AddComponent<WristController>();
             wrists.left = MakeHand(rig.transform, receiver, "Left", LeftWrist);
             wrists.right = MakeHand(rig.transform, receiver, "Right", RightWrist);
+            rig.AddComponent<WristCamInput>().wrists = wrists;
             rig.AddComponent<ToolRequester>();
             rig.AddComponent<AutoPilot>();
             var plating = rig.AddComponent<Plating>();

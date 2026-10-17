@@ -21,13 +21,22 @@ Full checklist: [glove-setup.md](glove-setup.md). In short:
 
 If no stream arrives for 2 s, the game plays a built-in hand animation, and the top-left status says "mock hands".
 
+## 2b. (Optional) Move your hands with the webcam
+```bash
+.venv/bin/python wrist_cam.py
+```
+- macOS will ask to let Terminal use the camera: allow it.
+- Face the webcam with your hands resting where the counter is, and hold still for a second (calibration). After that, moving your arms moves the hands in the kitchen. **C** recalibrates, **Q** quits.
+- It tracks your body's wrists (MediaPipe pose), which should work with gloves on (untested so far). If movements feel too small, try `--scale 1.6`.
+- While the camera is sending, the keyboard movement keys pause; the HUD says "wrists: webcam".
+
 ## 3. Play
 1. Open Unity Hub → **Add** → `~/let's cook!/LetsCook` → open with **6000.2.9f1**.
 2. Open `Assets/Scenes/Kitchen.unity` and press **Play**.
 
 | Key | What it does |
 |---|---|
-| W A S D | move hands across the counter (the gloves don't track wrist position yet) |
+| W A S D | move hands across the counter (when the wrist cam isn't running) |
 | Q / E | hands down / up |
 | Z / C | turn hands |
 | Tab / Space | move one hand / both hands |

@@ -9,6 +9,7 @@ namespace LetsCook
         public RokokoReceiver receiver;
         static readonly List<(string text, float until)> toasts = new List<(string, float)>();
         GUIStyle style, toastStyle;
+        WristCamInput cam;
 
         public static void Toast(string text, float seconds = 3f)
         {
@@ -25,6 +26,8 @@ namespace LetsCook
                 toastStyle = new GUIStyle(style) { fontSize = 22, fontStyle = FontStyle.Bold, alignment = TextAnchor.UpperCenter };
             }
             string status = receiver != null ? receiver.Status : "no receiver";
+            if (cam == null) cam = FindFirstObjectByType<WristCamInput>();
+            status += cam != null && cam.Active ? "  ·  wrists: webcam" : "  ·  wrists: keyboard";
             GUI.Label(new Rect(14, 10, 900, 24), "let's cook!  ·  " + status, style);
             GUI.Label(new Rect(14, 32, 1200, 24), Controls, style);
 
