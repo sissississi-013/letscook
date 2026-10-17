@@ -102,3 +102,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `HandGrasp.Contacts`: the object each fingertip and the palm is touching every physics step. Logged per frame as `contacts` (object ids), exported as `observation.contacts` (2×6 int16). Fixture regenerated.
 - `chef_server.py` saves each plate's screenshot to `cookbook/photos/` and rebuilds `cookbook/index.html` (one card per dish, newest first: photo, number, course, time, name, description, chef note, ingredients with doneness, what it unlocked; light/dark theme; names HTML-escaped). `cookbook/` is git-ignored (personal).
 - Evidence: pytest 32/32 (incl. photo saved as PNG + script-injection escape), Unity 25/25. Rendered sample page checked visually.
+
+### 16:04 Salt & pepper ✅
+- `Shaker.cs` + two shakers on the counter. Upside down (tilt > 0.3) pours 0.15 g/s, shaking (velocity changes) adds up to 1.2 g/s; grains are particles; seasoning lands on the first food straight below the cap. `FoodState.salt/pepper` (g) + `Seasoning` text ("lightly salted, peppered"). Included in the dish summary (salt_g, pepper_g, seasoning), the robot log and `season` events.
+- Evidence: PlayMode 12/12 incl. `UprightShakerDispensesNothing`, `ShakingUpsideDownOverBreadSaltsIt`. `shots/m11-kitchen.png`.

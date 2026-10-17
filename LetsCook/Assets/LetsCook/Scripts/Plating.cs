@@ -68,7 +68,10 @@ namespace LetsCook
                   .Append(",\"peak_surface_c\":").Append(Mathf.Round(s.peakSurface).ToString(Inv))
                   .Append(",\"browning\":").Append(s.browning.ToString("0.00", Inv))
                   .Append(",\"char\":").Append(s.charred.ToString("0.00", Inv))
-                  .Append(",\"seconds_on_heat\":").Append(Mathf.Round(s.secondsHeated).ToString(Inv)).Append('}');
+                  .Append(",\"seconds_on_heat\":").Append(Mathf.Round(s.secondsHeated).ToString(Inv))
+                  .Append(",\"salt_g\":").Append(s.salt.ToString("0.00", Inv))
+                  .Append(",\"pepper_g\":").Append(s.pepper.ToString("0.00", Inv))
+                  .Append(",\"seasoning\":").Append(Q(s.Seasoning)).Append('}');
             }
             sb.Append("],\"events\":{");
             var groups = CookEvents.History.GroupBy(e => e.type + ":" + e.subject).OrderBy(g => g.Key).ToList();

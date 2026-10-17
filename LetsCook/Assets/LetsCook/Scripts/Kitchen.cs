@@ -40,6 +40,13 @@ namespace LetsCook
             Physical(Knife(root, new Vector3(-0.17f, CounterTop + 0.03f, 0.27f)), 0.15f);
             Physical(Spatula(root, new Vector3(0.12f, CounterTop + 0.012f, 0.3f)), 0.08f);
 
+            foreach (var (name, x, color) in new[] { ("salt", 0.55f, Color.white), ("pepper", 0.62f, new Color(0.2f, 0.18f, 0.17f)) })
+            {
+                var shaker = ShakerItem(root, name == "salt" ? "Salt" : "Pepper", new Vector3(x, CounterTop + 0.045f, 0.68f), color, name);
+                Physical(shaker, 0.12f);
+                shaker.AddComponent<Shaker>().seasoning = name;
+            }
+
             // Ingredients
             Ingredient(Sphere(root, "Tomato", new Vector3(-0.25f, CounterTop + 0.06f, 0.45f), new Vector3(0.07f, 0.062f, 0.07f), Mat("tomato", new Color(0.86f, 0.16f, 0.1f), 0.75f)), "tomato", 0.12f);
             Ingredient(Sphere(root, "Onion", new Vector3(-0.1f, CounterTop + 0.06f, 0.47f), new Vector3(0.075f, 0.068f, 0.075f), Mat("onion", new Color(0.82f, 0.62f, 0.34f), 0.5f)), "onion", 0.15f);
@@ -90,6 +97,17 @@ namespace LetsCook
             knife.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
             Tag(knife, "knife", ItemKind.Tool);
             return knife;
+        }
+
+        static GameObject ShakerItem(Transform root, string name, Vector3 pos, Color color, string seasoning)
+        {
+            var go = new GameObject(name + " Shaker");
+            go.transform.SetParent(root, false);
+            go.transform.position = pos;
+            Disc(go.transform, name + " Body", pos, 0.022f, 0.075f, Mat(seasoning + "Shaker", color, 0.7f));
+            Disc(go.transform, name + " Cap", pos + Vector3.up * 0.042f, 0.02f, 0.012f, Mat("shakerCap", new Color(0.75f, 0.76f, 0.78f), 0.9f));
+            Tag(go, seasoning + " shaker", ItemKind.Tool);
+            return go;
         }
 
         static GameObject Spatula(Transform root, Vector3 pos)

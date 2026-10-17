@@ -64,8 +64,13 @@ namespace LetsCook
                 transform.localScale = new Vector3(baseScale.x * (1f + state.melted * 0.6f), baseScale.y * (1f - state.melted * 0.75f), baseScale.z * (1f + state.melted * 0.6f));
         }
 
+        public void Season(string seasoning, float grams)
+        {
+            if (seasoning == "pepper") state.pepper += grams; else state.salt += grams;
+        }
+
         /// One line for the dish summary / robot labels.
         public string Describe() =>
-            $"{ingredient} ({cut}): {state.Doneness}, surface {state.surfaceTemp:0}°C, core {state.coreTemp:0}°C, browning {state.browning:0.00}, char {state.charred:0.00}";
+            $"{ingredient} ({cut}): {state.Doneness}, surface {state.surfaceTemp:0}°C, core {state.coreTemp:0}°C, browning {state.browning:0.00}, char {state.charred:0.00}{(state.Seasoning.Length > 0 ? ", " + state.Seasoning : "")}";
     }
 }

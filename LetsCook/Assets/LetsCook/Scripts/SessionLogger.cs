@@ -182,7 +182,8 @@ namespace LetsCook
                 sb.Append(",\"food\":{\"cut\":").Append(Q(food.cut)).Append(",\"doneness\":").Append(Q(s.Doneness))
                   .Append(",\"surface\":").Append(F(s.surfaceTemp)).Append(",\"core\":").Append(F(s.coreTemp))
                   .Append(",\"browning\":").Append(F(s.browning)).Append(",\"char\":").Append(F(s.charred))
-                  .Append(",\"set\":").Append(F(s.set)).Append(",\"melted\":").Append(F(s.melted)).Append('}');
+                  .Append(",\"set\":").Append(F(s.set)).Append(",\"melted\":").Append(F(s.melted))
+                  .Append(",\"salt\":").Append(F(s.salt)).Append(",\"pepper\":").Append(F(s.pepper)).Append('}');
             }
             sb.Append('}');
         }

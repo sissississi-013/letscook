@@ -49,6 +49,7 @@ namespace LetsCook
         public float set;          // 0..1 protein set (egg) / softened (onion)
         public float melted;       // 0..1 (butter)
         public float secondsHeated;
+        public float salt, pepper;   // grams on this piece
         public float peakSurface;
 
         public FoodState(IngredientProfile p)
@@ -101,6 +102,19 @@ namespace LetsCook
         }
 
         /// Plain-language doneness, used in the dish summary sent to Claude and in robot-data labels.
+        /// "lightly salted", "well peppered"... or "" when unseasoned.
+        public string Seasoning
+        {
+            get
+            {
+                string Amount(float g, string word) => g <= 0.02f ? null : (g < 0.3f ? "lightly " : g < 1.2f ? "" : "heavily ") + word;
+                var parts = new System.Collections.Generic.List<string>();
+                var s = Amount(salt, "salted"); if (s != null) parts.Add(s);
+                var p = Amount(pepper, "peppered"); if (p != null) parts.Add(p);
+                return string.Join(", ", parts);
+            }
+        }
+
         public string Doneness
         {
             get
