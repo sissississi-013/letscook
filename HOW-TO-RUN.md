@@ -44,6 +44,7 @@ If no stream arrives for 2 s, the game plays a built-in hand animation, and the 
 | T | ask for **any tool** (type it, Enter) |
 | Enter | **serve** what's on the plate → Claude names it and unlocks a recipe |
 | Esc | close the dish card |
+| K | recalibrate the gloves through Rokoko Studio (turn on Studio → Settings → Command API; hold the calibration pose for the 3 s countdown) |
 
 Your **cookbook**: every served dish is saved with a photo. Open it with `open cookbook/index.html`.
 

@@ -36,6 +36,6 @@ namespace LetsCook
                 GUI.Label(new Rect(0, 70 + i * 30, Screen.width, 30), toasts[i].text, toastStyle);
         }
 
-        public static string Controls = "hands: WASD move · Q/E down/up · Z/C turn · Tab switch hand · Space both  |  B burner · +/- heat  |  T ask for any tool  |  Enter serve the plate";
+        public static string Controls = "hands: WASD move · Q/E down/up · Z/C turn · Tab switch hand · Space both  |  B burner · +/- heat  |  T ask for any tool  |  Enter serve the plate  |  K recalibrate gloves";
     }
 }

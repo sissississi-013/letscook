@@ -106,3 +106,8 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 ### 16:04 Salt & pepper ✅
 - `Shaker.cs` + two shakers on the counter. Upside down (tilt > 0.3) pours 0.15 g/s, shaking (velocity changes) adds up to 1.2 g/s; grains are particles; seasoning lands on the first food straight below the cap. `FoodState.salt/pepper` (g) + `Seasoning` text ("lightly salted, peppered"). Included in the dish summary (salt_g, pepper_g, seasoning), the robot log and `season` events.
 - Evidence: PlayMode 12/12 incl. `UprightShakerDispensesNothing`, `ShakingUpsideDownOverBreadSaltsIt`. `shots/m11-kitchen.png`.
+
+### 16:06 Recalibrate gloves from the game ✅
+- `StudioCommands.cs`: **K** → Rokoko Studio Command API `calibrate` (gloves only, 3 s countdown, pose straight-arms-down) at `127.0.0.1:14053/v1/1234`; toasts Studio's error text (e.g. plan not supported) or "turn on Command API" if unreachable; emits a `calibrate` event for the robot log.
+- Studio's Command API is listening on this Mac (14053); a read-only `info` call returned `null` (likely no scene open yet).
+- Evidence: PlayMode 13/13 incl. `UnreachableStudioFailsGracefully`.
