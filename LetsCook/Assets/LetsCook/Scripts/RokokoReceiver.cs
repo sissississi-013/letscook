@@ -44,6 +44,10 @@ namespace LetsCook
 
         public string Status => IsLive ? $"LIVE gloves ({latest.source}) · {packets} packets" : (injected != null ? "injected frame" : "mock hands (no glove stream on :" + port + ")");
 
+        /// Only real (or injected) glove data moves things. The idle mock animation is a ghost, so it can't
+        /// knock the kitchen over while nobody is wearing the gloves.
+        public bool DrivesPhysics => IsLive || injected != null;
+
         /// For tests and screenshots: force a frame regardless of the network.
         public void Inject(GloveFrame frame) => injected = frame;
 

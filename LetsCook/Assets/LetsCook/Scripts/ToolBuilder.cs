@@ -8,14 +8,6 @@ namespace LetsCook
     [Serializable] public class ToolSpec { public string name; public float mass_kg; public string[] abilities; public ToolPart[] parts; }
     [Serializable] public class ToolResponse { public string source; public ToolSpec tool; }
 
-    /// What a built tool can do (for logging, robot labels and future behaviours).
-    public class ToolInfo : MonoBehaviour
-    {
-        public string source;
-        public string[] abilities = new string[0];
-        public bool Can(string ability) => Array.IndexOf(abilities, ability) >= 0;
-    }
-
     /// Assembles a physical tool from a part list (from the library or Claude). Tool space: handle along +z, y up.
     public static class ToolBuilder
     {

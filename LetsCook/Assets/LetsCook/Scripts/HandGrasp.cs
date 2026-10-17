@@ -25,6 +25,7 @@ namespace LetsCook
         GloveHand hand;
         readonly Rigidbody[] tips = new Rigidbody[5];
         Rigidbody palm, grip;
+        Vector3 gripOffset;   // grip point in wrist space, fixed at grab time
         FixedJoint joint;
         readonly List<int> gripFingers = new List<int>();
         readonly List<Collider> ignored = new List<Collider>();
@@ -67,13 +68,30 @@ namespace LetsCook
         void FixedUpdate()
         {
             if (!hand.HasPose) return;
+            bool solid = hand.receiver == null || hand.receiver.DrivesPhysics;
+            if (solid != Solid) SetSolid(solid);
+            if (!solid) return;
             if (Held == null || joint == null) { if (Held != null) Release("joint broke"); TryGrab(); }
             else MaybeRelease();
 
             for (int f = 1; f <= 5; f++)
                 if (TipPosition(f, out var p)) tips[f - 1].MovePosition(p);
             if (PalmPosition(out var palmPos)) palm.MovePosition(palmPos);
-            if (Held != null) { grip.MovePosition(GripPoint()); grip.MoveRotation(hand.WristRotation); }
+            if (Held != null && WristPosition(out var w))
+            {
+                // Follow the wrist rigidly from where the object was grabbed: finger re-curls must not yank it.
+                grip.MovePosition(w + hand.WristRotation * gripOffset);
+                grip.MoveRotation(hand.WristRotation);
+            }
+        }
+
+        public bool Solid { get; private set; } = true;
+
+        void SetSolid(bool solid)
+        {
+            Solid = solid;
+            if (!solid && Held != null) Release("glove stream stopped");
+            foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = solid;
         }
 
         void TryGrab()
@@ -105,11 +123,14 @@ namespace LetsCook
             return c;
         }
 
+        bool WristPosition(out Vector3 p) => hand.TryGetPosition(hand.side + "Hand", out p);
+
         void Grab(Rigidbody target)
         {
             Held = target;
             grip.position = GripPoint();
             grip.rotation = hand.WristRotation;
+            gripOffset = WristPosition(out var w) ? Quaternion.Inverse(hand.WristRotation) * (grip.position - w) : Vector3.zero;
             foreach (var mine in GetComponentsInChildren<Collider>())
                 foreach (var theirs in target.GetComponentsInChildren<Collider>())
                 {

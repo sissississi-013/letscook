@@ -72,3 +72,16 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `HOW-TO-RUN.md` (helpers, Studio receivers, controls, how to cook, robot data export, dev commands, troubleshooting), `start.sh` (logger + chef server, `--mock`; skips anything already running; Ctrl+C stops what it started), README updated.
 - Evidence: `./start.sh --mock` started the chef server (health OK, /tool returned the library whisk) and fake gloves, detected the logger already running, and cleaned up on stop.
 - Note: that test briefly sent mock frames into the real logger's current session file (`sessions/20261017-145204.jsonl`); they're marked "Mock Newton".
+
+### 15:34 Real app run + bugs it found ✅
+- `./unity.sh app` builds `build/LetsCook.app`. `AutoPilot.cs`: `LetsCook.app/Contents/MacOS/LetsCook -autoshot <dir> -autoquit <s> [-autocook]` screenshots every 2 s; `-autocook` puts bread + butter in the pan at 30× cooking speed, plates them and serves.
+- Evidence (`shots/auto/`): with `mock_glove.py` streaming to 14045 and the chef server up, the app went **LIVE** (708 packets), cooked the toast (burnt black at 30× for about 5 min of cooking time), plated it, the chef server answered (offline name because of the 401 key), and the dish card showed. Session saved to `sessions/unity-*.jsonl`.
+- **Bugs found only by running the real app (all fixed):**
+  1. `KitchenItem`, `Burner`, `ToolInfo` lived in files with other names, so Unity dropped them from the saved scene ("missing script") and the built app crashed ("level0 is corrupted"). The Editor's Play button would have hit the same problem. Each now has its own file; new EditMode test `EveryComponentHasItsOwnScriptFile`.
+  2. **M8–M10 scene rebuilds had silently failed** (the plate was looked up before the kitchen existed), so the committed scene was stale since M7. Fixed the build order; the scene now has Plating, ToolRequester, AutoPilot.
+  3. The idle mock animation (no gloves) knocked the kitchen over. Mock hands are now ghosts: no colliders and no grabbing unless a real/streamed glove frame drives them (`RokokoReceiver.DrivesPhysics`). **Claude's call.**
+  4. Fingers appearing inside food launched it. `maxDepenetrationVelocity = 0.4 m/s` on kitchen bodies.
+  5. A held object followed the fingertip average, so re-curling yanked it (the pan ended up on the floor). It's now locked to the wrist where it was grabbed.
+  6. The built app wrote sessions inside `build/`. It now finds the repo folder (the one with chef_server.py).
+  7. Emoji rendered as boxes in the game font; removed.
+- Tests: EditMode 15/15, PlayMode 7/7, pytest 26/26.

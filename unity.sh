@@ -2,6 +2,7 @@
 # Batch-mode helpers for the LetsCook Unity project.
 #   ./unity.sh build              rebuild Assets/Scenes/Kitchen.unity from code
 #   ./unity.sh shot <pose> <name> [yes] render (yes = stage cooked food) shots/<name>.png with a mock pose (open|fist|pinch|point)
+#   ./unity.sh app               build build/LetsCook.app
 #   ./unity.sh test               run EditMode tests → logs/tests.xml
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -28,6 +29,9 @@ case "${1:-}" in
   shot)
     "$UNITY" -batchmode -quit -projectPath "$PROJECT" -executeMethod LetsCook.EditorTools.SceneBuilder.Shot -shotPose "${2:-pinch}" -shotName "${3:-shot}" -shotCook "${4:-no}" -shotTools "${5:-no}" -logFile logs/shot.log || { check logs/shot.log; tail -20 logs/shot.log; exit 1; }
     check logs/shot.log; grep "\[let's cook\]" logs/shot.log ;;
+  app)
+    "$UNITY" -batchmode -quit -projectPath "$PROJECT" -executeMethod LetsCook.EditorTools.SceneBuilder.BuildMac -logFile logs/app.log || { check logs/app.log; tail -20 logs/app.log; exit 1; }
+    check logs/app.log; grep "\[let's cook\]" logs/app.log ;;
   test)
     rm -f logs/tests-*.xml
     for mode in EditMode PlayMode; do

@@ -13,3 +13,4 @@ LetsCook/*.sln
 .venv/
 logs/
 cookbook.json
+build/

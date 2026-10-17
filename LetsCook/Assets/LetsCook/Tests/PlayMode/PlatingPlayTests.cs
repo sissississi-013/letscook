@@ -26,7 +26,7 @@ namespace LetsCook.Tests
             yield return new WaitForSeconds(0.5f);
 
             var onPlate = plating.FoodOnPlate();
-            Assert.AreEqual(1, onPlate.Count);
+            Assert.AreEqual(1, onPlate.Count, $"bread at {bread.transform.position}, plate at {plating.plate.position}, foods {Food.All.Count}");
             string summary = plating.SummaryJson(onPlate);
             StringAssert.Contains("\"ingredient\":\"bread\"", summary);
             StringAssert.Contains("golden brown", summary);

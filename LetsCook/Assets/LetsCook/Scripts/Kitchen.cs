@@ -3,18 +3,6 @@ using UnityEngine;
 
 namespace LetsCook
 {
-    public enum ItemKind { Tool, Ingredient, Container, Fixture }
-
-    /// Anything in the kitchen the game (and the robot-data logger) should know by name.
-    public class KitchenItem : MonoBehaviour
-    {
-        public string displayName;
-        public ItemKind kind;
-        public static readonly List<KitchenItem> All = new List<KitchenItem>();
-        void OnEnable() => All.Add(this);
-        void OnDisable() => All.Remove(this);
-    }
-
     /// Builds the first kitchen from primitives. Counter top is at y = 0.9 m; the player stands at -z looking +z.
     public static class Kitchen
     {
@@ -169,6 +157,7 @@ namespace LetsCook
             rb.mass = mass;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            rb.maxDepenetrationVelocity = 0.4f;   // a finger appearing inside food nudges it instead of launching it
             return rb;
         }
 

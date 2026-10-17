@@ -41,12 +41,14 @@ namespace LetsCook.EditorTools
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(0.55f, 0.52f, 0.5f);
 
+            Kitchen.Build();   // first: the rig below looks up kitchen objects (the plate)
             var rig = new GameObject("Glove Rig");
             var receiver = rig.AddComponent<RokokoReceiver>();
             var wrists = rig.AddComponent<WristController>();
             wrists.left = MakeHand(rig.transform, receiver, "Left", LeftWrist);
             wrists.right = MakeHand(rig.transform, receiver, "Right", RightWrist);
             rig.AddComponent<ToolRequester>();
+            rig.AddComponent<AutoPilot>();
             var plating = rig.AddComponent<Plating>();
             plating.plate = GameObject.Find("Plate").transform;
             plating.shotCamera = cam;
@@ -55,7 +57,6 @@ namespace LetsCook.EditorTools
             logger.left = wrists.left.parent.Find("Left Hand").GetComponent<GloveHand>();
             logger.right = wrists.right.parent.Find("Right Hand").GetComponent<GloveHand>();
 
-            Kitchen.Build();
             rig.AddComponent<GameHud>().receiver = receiver;
             KitchenHook?.Invoke(scene);
             SaveMaterials();
@@ -98,6 +99,19 @@ namespace LetsCook.EditorTools
             hand.anchor = anchor;
             hand.gameObject.AddComponent<HandGrasp>();
             return anchor;
+        }
+
+        /// Builds a standalone macOS app to ../build/LetsCook.app.
+        public static void BuildMac()
+        {
+            PlayerSettings.productName = "LetsCook";
+            PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
+            PlayerSettings.defaultScreenWidth = 1280;
+            PlayerSettings.defaultScreenHeight = 720;
+            PlayerSettings.runInBackground = true;
+            var report = BuildPipeline.BuildPlayer(new[] { ScenePath }, Path.GetFullPath("../build/LetsCook.app"), BuildTarget.StandaloneOSX, BuildOptions.None);
+            Debug.Log($"[let's cook] Build {report.summary.result}: {report.summary.outputPath} ({report.summary.totalSize / 1048576} MB, {report.summary.totalErrors} errors)");
+            if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded) EditorApplication.Exit(1);
         }
 
         public static void Shot()

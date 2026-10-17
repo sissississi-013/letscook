@@ -48,7 +48,7 @@ namespace LetsCook
         public void Serve()
         {
             var onPlate = FoodOnPlate();
-            if (onPlate.Count == 0) { GameHud.Toast("put something on the plate first 🍽️", 2f); return; }
+            if (onPlate.Count == 0) { GameHud.Toast("put something on the plate first", 2f); return; }
             StartCoroutine(SendDish(SummaryJson(onPlate), Screenshot()));
         }
 
@@ -106,7 +106,7 @@ namespace LetsCook
         IEnumerator SendDish(string summary, string screenshot)
         {
             Busy = true;
-            GameHud.Toast("the chef is tasting… 👩‍🍳", 2.5f);
+            GameHud.Toast("the chef is tasting…", 2.5f);
             string body = "{\"summary\":" + summary + (screenshot != null ? ",\"screenshot_b64\":" + Q(screenshot) : "") + "}";
             using (var req = new UnityWebRequest(chefUrl, "POST"))
             {
@@ -152,10 +152,10 @@ namespace LetsCook
             GUI.Label(new Rect(r.x + 20, r.y + 14, w - 40, 70), LastDish.dish_name, title);
             GUI.Label(new Rect(r.x + 20, r.y + 84, w - 40, 24), LastDish.course.ToUpperInvariant() + (LastDish.offline ? " · offline" : ""), body);
             GUI.Label(new Rect(r.x + 20, r.y + 112, w - 40, 60), LastDish.description, body);
-            GUI.Label(new Rect(r.x + 20, r.y + 172, w - 40, 40), "💬 " + LastDish.chef_note, body);
+            GUI.Label(new Rect(r.x + 20, r.y + 172, w - 40, 40), LastDish.chef_note, body);
             if (LastDish.unlock != null)
                 GUI.Label(new Rect(r.x + 20, r.y + 218, w - 40, 70),
-                    $"🔓 Unlocked: {LastDish.unlock.recipe_name} ({LastDish.unlock.course})\n{LastDish.unlock.first_step}", body);
+                    $"Unlocked: {LastDish.unlock.recipe_name} ({LastDish.unlock.course})\n{LastDish.unlock.first_step}", body);
         }
 
         static string Q(string s) => "\"" + (s ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";

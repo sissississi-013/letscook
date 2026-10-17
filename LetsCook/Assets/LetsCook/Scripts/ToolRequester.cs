@@ -45,7 +45,7 @@ namespace LetsCook
         public IEnumerator Request(string request)
         {
             busy = true;
-            GameHud.Toast($"finding a {request}… 🔧", 2f);
+            GameHud.Toast($"finding a {request}…", 2f);
             string body = "{\"request\":\"" + request.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"}";
             using (var req = new UnityWebRequest(chefUrl, "POST"))
             {

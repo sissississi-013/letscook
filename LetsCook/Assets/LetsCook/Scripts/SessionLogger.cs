@@ -49,8 +49,7 @@ namespace LetsCook
 
         void OnEnable()
         {
-            if (string.IsNullOrEmpty(directory))
-                directory = Path.GetFullPath(Path.Combine(Application.dataPath, "../../sessions"));
+            if (string.IsNullOrEmpty(directory)) directory = DefaultDirectory();
             Directory.CreateDirectory(directory);
             string id = "unity-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
             FilePath = Path.Combine(directory, id + ".jsonl");
@@ -68,6 +67,15 @@ namespace LetsCook
             writer.WriteLine(sb.ToString());
             CookEvents.Emitted += OnEvent;
             Debug.Log("[let's cook] Logging session to " + FilePath);
+        }
+
+        /// <repo>/sessions: the folder holding chef_server.py above the project (editor) or the app (build).
+        public static string DefaultDirectory()
+        {
+            var dir = new DirectoryInfo(Application.dataPath);
+            for (int i = 0; i < 6 && dir != null; i++, dir = dir.Parent)
+                if (File.Exists(Path.Combine(dir.FullName, "chef_server.py"))) return Path.Combine(dir.FullName, "sessions");
+            return Path.Combine(Application.persistentDataPath, "sessions");
         }
 
         void OnDisable()
