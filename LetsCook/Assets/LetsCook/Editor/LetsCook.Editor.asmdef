@@ -1,0 +1,9 @@
+{
+  "name": "LetsCook.Editor",
+  "rootNamespace": "LetsCook.EditorTools",
+  "references": ["LetsCook"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true
+}

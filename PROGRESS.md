@@ -4,7 +4,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 
 ## Milestones
 - [x] M1 Mock gloves
-- [ ] M2 Unity project + glove receiver
+- [x] M2 Unity project + glove receiver
 - [ ] M3 Kitchen
 - [ ] M4 Grab anything
 - [ ] M5 Cooking state
@@ -28,3 +28,10 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - Gotcha found: **macOS caps UDP datagrams at 9216 bytes by default**; a 10 KB frame failed with `Errno 40 Message too long` until SO_SNDBUF was raised. Real Studio frames may hit the same limit; if the logger sees nothing from Studio, try "JSON v4 (LZ4)".
 - Python deps live in `.venv/` (lz4, pytest, numpy, pyarrow, anthropic).
 - Real-glove logger is running on 14043 waiting for Studio.
+
+### 15:20 M2 Unity project + glove receiver ✅
+- `LetsCook/` Unity 6 project (6000.2.9f1, built-in render pipeline, legacy Input Manager), + test-framework, ugui.
+- `GloveFrame.cs` (JsonUtility v4 parser, joints by name with parent names, `HandMath.Curl`), `RokokoReceiver.cs` (UDP thread on 14045, falls back to a built-in mock animation when silent for 2 s, warns on LZ4), `GloveHand.cs` (spheres + capsules from joint positions, wrist pinned to an anchor).
+- `SceneBuilder.cs` builds `Assets/Scenes/Kitchen.unity` from code; `SceneBuilder.Shot` renders screenshots in batch mode.
+- `./unity.sh build | shot <pose> <name> | test` wraps batch mode (refuses if the project is open in the Editor).
+- Evidence: EditMode 4/4 passed (parse, v3 rejection, curl per pose, lerp); PlayMode 1/1 passed (real UDP packet → receiver goes live, 50 joints, fist curl > 0.9). Screenshot `shots/m2-pinch.png` shows both hands.
