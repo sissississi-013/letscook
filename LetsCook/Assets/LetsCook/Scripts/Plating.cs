@@ -29,6 +29,7 @@ namespace LetsCook
 
         void Update()
         {
+            if (ToolRequester.Typing) return;
             if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) && !Busy) Serve();
             if (Input.GetKeyDown(KeyCode.Escape)) shownUntil = 0f;
         }

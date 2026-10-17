@@ -19,6 +19,7 @@ namespace LetsCook
 
         void Update()
         {
+            if (ToolRequester.Typing) return;
             if (Input.GetKeyDown(KeyCode.Tab)) { both = false; rightSelected = !rightSelected; GameHud.Toast("moving " + Mode, 1f); }
             if (Input.GetKeyDown(KeyCode.Space)) { both = !both; GameHud.Toast("moving " + Mode, 1f); }
 

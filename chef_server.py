@@ -4,6 +4,8 @@ Run:  .venv/bin/python chef_server.py          (listens on 127.0.0.1:8776)
 
 POST /dish   {"summary": {...}, "screenshot_b64": "<png base64, optional>"}
              → {"dish_name", "course", "description", "chef_note", "unlock": {...}, "offline": bool}
+POST /tool   {"request": "a mortar and pestle"}
+             → {"source": "library" | "claude" | "offline", "tool": {name, mass_kg, abilities, parts: [...]}}
 GET  /cookbook → every dish so far (cookbook.json)
 
 The API key stays here (ANTHROPIC_API_KEY from the environment); Unity never sees it.
@@ -66,6 +68,121 @@ SCHEMA = {
     "required": ["dish_name", "course", "description", "chef_note", "unlock"],
     "additionalProperties": False,
 }
+
+
+TOOL_LIBRARY = ROOT / "tools_library.json"
+SHAPES = ["box", "cylinder", "sphere", "capsule", "bowl"]
+ROLES = ["handle", "blade", "head", "bowl", "tines", "body", "arm", "base", "lid"]
+MATERIALS = ["steel", "iron", "wood", "silicone", "ceramic", "plastic", "stone", "glass", "copper"]
+ABILITIES = ["cuts", "scoops", "stirs", "whisks", "crushes", "presses", "flips", "grates", "peels", "grips",
+             "holds", "holds_liquid", "pours", "heats", "strains", "spreads"]
+
+TOOL_SYSTEM = """You design kitchen tools for "let's cook!", a realistic physics cooking game played with motion-capture gloves.
+The player asks for a tool in their own words; you describe it as a few simple primitive parts that the game assembles.
+
+Rules:
+- Real-world dimensions in metres and a realistic total mass in kg. size is [x, y, z] (width, height, length) of each part.
+- Tool space: the main handle runs along +z, y is up, origin at the point where a hand would grip. offset is the part
+  centre in tool space; rotation is Euler degrees [x, y, z] applied to the part.
+- Use 1 to 6 parts. Shapes: box, cylinder (axis along its local y), sphere (scaled to size), capsule (axis along y),
+  bowl (an open hollow container of the given size). Roles describe what the part is for.
+- abilities: only what the real tool does (e.g. a knife "cuts", a pan "holds" + "heats"). A part with role "blade" is a
+  cutting edge, so only use it for tools that really cut.
+- If the request isn't a cooking tool, design the closest kitchen-safe interpretation and name it honestly."""
+
+TOOL_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "mass_kg": {"type": "number"},
+        "abilities": {"type": "array", "items": {"type": "string", "enum": ABILITIES}},
+        "parts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "role": {"type": "string", "enum": ROLES},
+                    "shape": {"type": "string", "enum": SHAPES},
+                    "size": {"type": "array", "items": {"type": "number"}},
+                    "offset": {"type": "array", "items": {"type": "number"}},
+                    "rotation": {"type": "array", "items": {"type": "number"}},
+                    "material": {"type": "string", "enum": MATERIALS},
+                },
+                "required": ["role", "shape", "size", "offset", "rotation", "material"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "required": ["name", "mass_kg", "abilities", "parts"],
+    "additionalProperties": False,
+}
+
+
+def _vec(v, default, lo, hi):
+    v = list(v or [])[:3]
+    v += default[len(v):]
+    return [max(lo, min(hi, float(x))) for x in v]
+
+
+def clean_tool(tool):
+    """Structured outputs can't enforce numeric ranges, so clamp everything to sane real-world values here."""
+    parts = []
+    for p in (tool.get("parts") or [])[:8]:
+        parts.append({
+            "role": p.get("role") if p.get("role") in ROLES else "body",
+            "shape": p.get("shape") if p.get("shape") in SHAPES else "box",
+            "size": _vec(p.get("size"), [0.05, 0.05, 0.05], 0.003, 0.6),
+            "offset": _vec(p.get("offset"), [0, 0, 0], -0.5, 0.5),
+            "rotation": _vec(p.get("rotation"), [0, 0, 0], -360, 360),
+            "material": p.get("material") if p.get("material") in MATERIALS else "steel",
+        })
+    if not parts:
+        parts = [{"role": "handle", "shape": "box", "size": [0.02, 0.02, 0.2], "offset": [0, 0, 0], "rotation": [0, 0, 0], "material": "wood"}]
+    return {
+        "name": str(tool.get("name") or "mystery tool")[:40],
+        "mass_kg": max(0.01, min(5.0, float(tool.get("mass_kg") or 0.2))),
+        "abilities": [a for a in (tool.get("abilities") or []) if a in ABILITIES],
+        "parts": parts,
+    }
+
+
+def load_library():
+    try:
+        return json.loads(TOOL_LIBRARY.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def find_in_library(request, library=None):
+    words = request.lower().strip()
+    for tool in library if library is not None else load_library():
+        for name in [tool["name"], *tool.get("aliases", [])]:
+            if name in words:
+                return tool
+    return None
+
+
+def design_tool(request, client=None):
+    hit = find_in_library(request)
+    if hit:
+        return {"source": "library", "tool": clean_tool(hit)}
+    try:
+        response = (client or anthropic.Anthropic()).beta.messages.create(
+            model=MODEL,
+            max_tokens=4000,
+            betas=["server-side-fallback-2026-07-01"],
+            fallbacks="default",
+            system=[{"type": "text", "text": TOOL_SYSTEM, "cache_control": {"type": "ephemeral"}}],
+            output_config={"effort": "low", "format": {"type": "json_schema", "schema": TOOL_SCHEMA}},
+            messages=[{"role": "user", "content": f"The player asks for: {request}"}],
+        )
+        if response.stop_reason == "refusal":
+            raise RuntimeError("declined")
+        tool = json.loads(next(b.text for b in response.content if b.type == "text"))
+        return {"source": "claude", "tool": clean_tool(tool)}
+    except (anthropic.APIError, RuntimeError, StopIteration, json.JSONDecodeError) as e:
+        print(f"[chef] tool offline fallback: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        return {"source": "offline", "tool": clean_tool({"name": request, "parts": [], "abilities": ["stirs"]})}
 
 
 def load_cookbook():
@@ -162,6 +279,10 @@ class Handler(BaseHTTPRequestHandler):
             dish = name_dish(req.get("summary", {}), req.get("screenshot_b64"))
             print(f"[chef] {dish['dish_name']} ({dish['course']})", flush=True)
             return self._send(200, dish)
+        if self.path == "/tool":
+            result = design_tool(str(req.get("request", ""))[:200])
+            print(f"[chef] tool '{result['tool']['name']}' from {result['source']}", flush=True)
+            return self._send(200, result)
         self._send(404, {"error": "not found"})
 
     def log_message(self, fmt, *args):

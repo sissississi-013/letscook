@@ -46,6 +46,7 @@ namespace LetsCook.EditorTools
             var wrists = rig.AddComponent<WristController>();
             wrists.left = MakeHand(rig.transform, receiver, "Left", LeftWrist);
             wrists.right = MakeHand(rig.transform, receiver, "Right", RightWrist);
+            rig.AddComponent<ToolRequester>();
             var plating = rig.AddComponent<Plating>();
             plating.plate = GameObject.Find("Plate").transform;
             plating.shotCamera = cam;
@@ -112,10 +113,26 @@ namespace LetsCook.EditorTools
             foreach (var hand in UnityEngine.Object.FindObjectsByType<GloveHand>(FindObjectsSortMode.None))
                 hand.Apply(frame);
             if (Arg("-shotCook", "no") == "yes") StageCookedFood();
+            if (Arg("-shotTools", "no") == "yes") StageLibraryTools();
             ShotHook?.Invoke();
 
             Capture(Camera.main, name);
         }
+
+        /// Lays every library tool along the front of the counter.
+        static void StageLibraryTools()
+        {
+            string json = File.ReadAllText(Path.Combine(Application.dataPath, "../../tools_library.json"));
+            var tools = JsonUtility.FromJson<ToolList>("{\"items\":" + json + "}").items;
+            for (int i = 0; i < tools.Length; i++)
+            {
+                float x = -0.62f + i * 0.135f;
+                var go = ToolBuilder.Build(tools[i], new Vector3(x, Kitchen.CounterTop + 0.04f, 0.2f));
+                go.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            }
+        }
+
+        [Serializable] class ToolList { public ToolSpec[] items; }
 
         /// Puts toast and melted butter in the pan and scorches the tomato, to eyeball the colours.
         static void StageCookedFood()

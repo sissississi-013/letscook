@@ -142,7 +142,7 @@ namespace LetsCook
         }
 
         /// A ring of thin boxes: walls for pans and bowls (concave containers need several convex pieces).
-        static void Ring(Transform parent, Vector3 center, float radius, float height, float thickness, int segments, Material mat, float flare = 0f)
+        public static void Ring(Transform parent, Vector3 center, float radius, float height, float thickness, int segments, Material mat, float flare = 0f)
         {
             float seg = 2f * Mathf.PI * radius / segments * 1.08f;
             for (int i = 0; i < segments; i++)

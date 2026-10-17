@@ -10,13 +10,24 @@ namespace LetsCook
         public float minThickness = 0.008f;    // don't cut pieces thinner than this
         public static int MaxPieces = 40;
 
+        /// The blade's thinnest axis is its normal, whatever way the part was modelled.
+        public Vector3 BladeNormal
+        {
+            get
+            {
+                Vector3 s = transform.lossyScale;
+                if (Mathf.Abs(s.x) <= Mathf.Abs(s.y) && Mathf.Abs(s.x) <= Mathf.Abs(s.z)) return transform.right;
+                return Mathf.Abs(s.y) <= Mathf.Abs(s.z) ? transform.up : transform.forward;
+            }
+        }
+
         void OnCollisionEnter(Collision c) => TryCut(c.collider, c.relativeVelocity.magnitude);
 
         public bool TryCut(Collider other, float speed)
         {
             var food = other.GetComponentInParent<Food>();
             if (food == null || speed < minSpeed) return false;
-            return Cut(food, transform.forward) != null;
+            return Cut(food, BladeNormal) != null;
         }
 
         /// Returns the new piece, or null if the food can't be cut further.

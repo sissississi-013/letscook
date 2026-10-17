@@ -42,6 +42,7 @@ namespace LetsCook
 
         void Update()
         {
+            if (ToolRequester.Typing) return;
             if (Input.GetKeyDown(KeyCode.B)) { on = !on; GameHud.Toast(on ? "burner on 🔥" : "burner off", 1.2f); }
             if (Input.GetKeyDown(KeyCode.Equals)) { level = Mathf.Clamp01(level + 0.25f); GameHud.Toast($"heat {level * 100:0}%", 1f); }
             if (Input.GetKeyDown(KeyCode.Minus)) { level = Mathf.Clamp01(level - 0.25f); GameHud.Toast($"heat {level * 100:0}%", 1f); }

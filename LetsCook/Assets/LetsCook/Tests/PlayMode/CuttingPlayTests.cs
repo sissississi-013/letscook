@@ -37,7 +37,7 @@ namespace LetsCook.Tests
             blade.transform.SetParent(root.transform);
             blade.transform.localScale = new Vector3(0.003f, 0.035f, 0.18f);   // thin along x
             blade.transform.position = new Vector3(0f, 0.12f, 0f);
-            blade.transform.rotation = Quaternion.LookRotation(Vector3.right);  // blade normal (forward) = world x
+            // thin along x, so the blade normal is world x
             var rb = blade.AddComponent<Rigidbody>();
             rb.mass = 0.15f;
             rb.useGravity = false;
