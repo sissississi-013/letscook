@@ -1,0 +1,12 @@
+sessions/
+__pycache__/
+.pytest_cache/
+.claude/
+LetsCook/Library/
+LetsCook/Temp/
+LetsCook/Logs/
+LetsCook/UserSettings/
+LetsCook/obj/
+LetsCook/*.csproj
+LetsCook/*.sln
+.DS_Store
