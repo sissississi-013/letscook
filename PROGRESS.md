@@ -85,3 +85,8 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
   6. The built app wrote sessions inside `build/`. It now finds the repo folder (the one with chef_server.py).
   7. Emoji rendered as boxes in the game font; removed.
 - Tests: EditMode 15/15, PlayMode 7/7, pytest 26/26.
+
+### 15:39 Egg cracking ✅
+- `EggCracker.cs`: a whole egg cracks on a hard impact (≥ 0.7 m/s; fingers and other food don't count) or when a knife hits it. The shell splits into two bits and the white + yolk spill onto the first solid surface below (pan, bowl, board, counter) as a new `egg (cracked)` food with its own profile that fries: white goes from glossy translucent to opaque, "fully set" at 62 °C+. Emits a `crack` event ("into the pan").
+- Glove checker: `glove_check.py` (live per-finger curl bars from the logger) added earlier.
+- Evidence: PlayMode 9/9 incl. `GentleSetDownDoesNotCrack` and `DroppedIntoThePanItCracksAndFries` (crack event says "into the pan"; fully set after about 200 s of cooking time). EditMode 15/15.

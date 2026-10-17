@@ -27,6 +27,7 @@ namespace LetsCook
         {
             var food = other.GetComponentInParent<Food>();
             if (food == null || speed < minSpeed) return false;
+            if (food.TryGetComponent<EggCracker>(out var egg)) return egg.Crack(food.transform.position) != null;
             return Cut(food, BladeNormal) != null;
         }
 

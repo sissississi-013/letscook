@@ -166,6 +166,7 @@ namespace LetsCook
             Physical(go, mass);
             Tag(go, name, ItemKind.Ingredient);
             go.AddComponent<Food>().Init(name);
+            if (name == "egg") go.AddComponent<EggCracker>();
         }
 
         static void Tag(GameObject go, string name, ItemKind kind)

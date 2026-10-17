@@ -24,6 +24,7 @@ namespace LetsCook
                 case "tomato": return new IngredientProfile { name = ingredient, startTemp = 18f, water = 0.95f, coreRate = 0.012f, raw = new Color(0.86f, 0.16f, 0.1f), cooked = new Color(0.72f, 0.12f, 0.06f) };
                 case "onion": return new IngredientProfile { name = ingredient, startTemp = 18f, water = 0.9f, coreRate = 0.012f, setTemp = 85f, raw = new Color(0.82f, 0.62f, 0.34f), cooked = new Color(0.9f, 0.78f, 0.55f) };
                 case "egg": return new IngredientProfile { name = ingredient, startTemp = 5f, water = 0.88f, coreRate = 0.015f, setTemp = 62f, raw = new Color(0.98f, 0.93f, 0.84f), cooked = new Color(1f, 0.99f, 0.95f) };
+                case "egg_open": return new IngredientProfile { name = "egg", startTemp = 5f, water = 0.88f, coreRate = 0.06f, setTemp = 62f, raw = new Color(0.95f, 0.92f, 0.8f), cooked = new Color(1f, 1f, 0.97f) };
                 case "butter": return new IngredientProfile { name = ingredient, startTemp = 5f, water = 0.16f, coreRate = 0.04f, meltTemp = 32f, raw = new Color(1f, 0.9f, 0.45f), cooked = new Color(1f, 0.82f, 0.3f) };
                 case "bread": return new IngredientProfile { name = ingredient, startTemp = 20f, water = 0.35f, coreRate = 0.05f, raw = new Color(0.93f, 0.8f, 0.55f), cooked = new Color(0.93f, 0.8f, 0.55f) };
                 default: return new IngredientProfile { name = ingredient };
