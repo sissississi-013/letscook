@@ -12,3 +12,4 @@ LetsCook/*.sln
 .DS_Store
 .venv/
 logs/
+cookbook.json
