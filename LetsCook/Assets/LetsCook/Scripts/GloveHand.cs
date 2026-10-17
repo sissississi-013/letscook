@@ -10,8 +10,8 @@ namespace LetsCook
         public RokokoReceiver receiver;
         public string side = "Left";
         public Transform anchor;
-        public float jointRadius = 0.0085f;
-        public Color skinColor = new Color(0.95f, 0.78f, 0.62f);
+        public float jointRadius = 0.0095f;
+        public Color skinColor = new Color(0.93f, 0.74f, 0.6f);
 
         readonly Dictionary<string, Transform> spheres = new Dictionary<string, Transform>();
         readonly Dictionary<string, Transform> bones = new Dictionary<string, Transform>();
@@ -50,8 +50,10 @@ namespace LetsCook
             foreach (var kv in frame.joints)
             {
                 if (!IsMine(kv.Key) || kv.Value.parent == null || !positions.ContainsKey(kv.Value.parent)) continue;
-                PlaceBone(Bone(kv.Key), positions[kv.Value.parent], positions[kv.Key]);
+                if (kv.Key.EndsWith("Metacarpal") && !kv.Key.Contains("Finger1")) continue;   // the palm covers these
+                PlaceBone(Bone(kv.Key), positions[kv.Value.parent], positions[kv.Key], (Radius(kv.Value.parent) + Radius(kv.Key)) * 0.5f);
             }
+            PlacePalm(turn * wrist.rotation);
         }
 
         bool IsMine(string joint) => joint == side + "Hand" || joint.StartsWith(side + "Finger");
@@ -61,7 +63,7 @@ namespace LetsCook
             if (material == null)
             {
                 material = new Material(Shader.Find("Standard")) { color = skinColor };
-                material.SetFloat("_Glossiness", 0.35f);
+                material.SetFloat("_Glossiness", 0.22f);
             }
             return material;
         }
@@ -73,7 +75,7 @@ namespace LetsCook
             go.name = joint;
             Destroy(go.GetComponent<Collider>());
             go.GetComponent<Renderer>().sharedMaterial = Mat();
-            float r = joint.EndsWith("Hand") ? jointRadius * 2.2f : jointRadius;
+            float r = Radius(joint);
             go.transform.localScale = Vector3.one * r * 2f;
             go.transform.SetParent(transform, true);
             spheres[joint] = go.transform;
@@ -92,7 +94,20 @@ namespace LetsCook
             return go.transform;
         }
 
-        void PlaceBone(Transform bone, Vector3 from, Vector3 to)
+        /// Fingers taper from knuckle to tip; the thumb is a little thicker.
+        float Radius(string joint)
+        {
+            if (joint.EndsWith("Hand")) return jointRadius * 1.4f;
+            float r = jointRadius;
+            if (joint.EndsWith("Metacarpal") || joint.EndsWith("Proximal")) r *= 1.12f;
+            else if (joint.EndsWith("Distal")) r *= 0.9f;
+            else if (joint.EndsWith("Tip")) r *= 0.82f;
+            if (joint.Contains("Finger1")) r *= 1.15f;
+            if (joint.Contains("Finger5")) r *= 0.85f;
+            return r;
+        }
+
+        void PlaceBone(Transform bone, Vector3 from, Vector3 to, float radius)
         {
             Vector3 d = to - from;
             float len = d.magnitude;
@@ -100,8 +115,35 @@ namespace LetsCook
             bone.gameObject.SetActive(true);
             bone.position = (from + to) * 0.5f;
             bone.rotation = Quaternion.FromToRotation(Vector3.up, d / len);
-            float w = jointRadius * 1.7f;
-            bone.localScale = new Vector3(w, len * 0.5f + w * 0.25f, w);
+            float w = radius * 2f;
+            bone.localScale = new Vector3(w, len * 0.5f + radius * 0.5f, w);
+        }
+
+        Transform palm;
+
+        /// A flattened rounded palm spanning the wrist and the index–little knuckles.
+        void PlacePalm(Quaternion handRotation)
+        {
+            if (!positions.TryGetValue(side + "Hand", out var w) ||
+                !positions.TryGetValue(side + "Finger2Proximal", out var index) ||
+                !positions.TryGetValue(side + "Finger5Proximal", out var little)) return;
+            if (palm == null)
+            {
+                var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                go.name = side + " Palm";
+                Destroy(go.GetComponent<Collider>());
+                go.GetComponent<Renderer>().sharedMaterial = Mat();
+                go.transform.SetParent(transform, true);
+                palm = go.transform;
+            }
+            Vector3 knuckles = (index + little) * 0.5f;
+            Vector3 forward = knuckles - w;
+            Vector3 across = index - little;
+            Vector3 up = Vector3.Cross(forward, across).normalized;
+            if (side == "Left") up = -up;
+            palm.position = Vector3.Lerp(w, knuckles, 0.5f);
+            palm.rotation = Quaternion.LookRotation(forward.normalized, up);
+            palm.localScale = new Vector3(across.magnitude + jointRadius * 2.6f, jointRadius * 2.6f, forward.magnitude + jointRadius * 2.2f);
         }
 
         static void Destroy(Object o)

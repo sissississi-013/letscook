@@ -31,14 +31,15 @@ namespace LetsCook
         {
             if (cook)
             {
-                Food.TimeScale = 30f;
+                Food.TimeScale = 12f;
                 // Lift the hands out of the way so the demo isn't knocked over by the animation.
                 var wrists = FindFirstObjectByType<WristController>();
                 if (wrists != null) { wrists.left.position += Vector3.up * 0.25f; wrists.right.position += Vector3.up * 0.25f; }
                 var pan = FindFirstObjectByType<Cookware>();
+                pan.AddOil(8f);
                 foreach (var f in Food.All.ToArray())
-                    if (f.ingredient == "bread") Teleport(f.gameObject, pan.transform.position + new Vector3(-0.02f, 0.03f, 0f));
-                    else if (f.ingredient == "butter") Teleport(f.gameObject, pan.transform.position + new Vector3(0.06f, 0.04f, 0.04f));
+                    if (f.ingredient == "bread") Teleport(f.gameObject, pan.transform.position + new Vector3(-0.045f, 0.03f, 0f));
+                    else if (f.ingredient == "egg") Teleport(f.gameObject, pan.transform.position + new Vector3(0.05f, 0.25f, 0.02f));   // falls and cracks
             }
             int n = 0;
             float end = Time.realtimeSinceStartup + (quitAfter > 0f ? quitAfter : 6f);
@@ -55,8 +56,8 @@ namespace LetsCook
             {
                 var plating = FindFirstObjectByType<Plating>();
                 foreach (var f in Food.All.ToArray())
-                    if (f.ingredient == "bread" || f.ingredient == "butter")
-                        Teleport(f.gameObject, plating.plate.position + new Vector3(f.ingredient == "bread" ? -0.02f : 0.05f, 0.04f, 0f));
+                    if (f.ingredient == "bread" || (f.ingredient == "egg" && f.cut == "cracked"))
+                        Teleport(f.gameObject, plating.plate.position + new Vector3(f.ingredient == "bread" ? -0.03f : 0.04f, f.ingredient == "bread" ? 0.03f : 0.05f, 0f));
                 yield return new WaitForSecondsRealtime(1f);
                 plating.Serve();
                 float until = Time.realtimeSinceStartup + 60f;

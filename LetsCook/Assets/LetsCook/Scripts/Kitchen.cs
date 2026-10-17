@@ -68,7 +68,74 @@ namespace LetsCook
             Ingredient(Box(root, "Butter", new Vector3(-0.28f, CounterTop + 0.016f, 0.72f), new Vector3(0.07f, 0.032f, 0.04f), Mat("butter", new Color(1f, 0.9f, 0.45f), 0.6f)), "butter", 0.06f);
             Ingredient(Box(root, "Bread", new Vector3(-0.55f, CounterTop + 0.01f, 0.4f), new Vector3(0.11f, 0.018f, 0.1f), Mat("bread", new Color(0.93f, 0.8f, 0.55f), 0.1f)), "bread", 0.04f);
 
+            Dress(root);
             return root;
+        }
+
+        // --- looks: textures and smooth meshes on top of the simple physics shapes ------------------------
+
+        static void Dress(Transform root)
+        {
+            Texture(root, "Counter", "counter", new Vector2(4f, 2f), Color.white, 0.6f);
+            root.Find("Backsplash").GetComponent<Renderer>().sharedMaterial = Mat("wallPaint", new Color(0.78f, 0.84f, 0.8f), 0.15f);
+            Texture(root, "Floor", "floor", new Vector2(3f, 2.2f), new Color(0.85f, 0.8f, 0.75f), 0.35f);
+            Texture(root, "Cutting Board", "board", new Vector2(0.6f, 0.4f), new Color(1f, 0.9f, 0.78f), 0.2f);
+
+            SwapMesh(root, "Tomato", Shapes.Tomato());
+            SwapMesh(root, "Onion", Shapes.Onion());
+            SwapMesh(root, "Egg", Shapes.Egg());
+            SwapMesh(root, "Plate", Shapes.Plate());
+            var tomato = root.Find("Tomato");
+            if (tomato != null)
+            {
+                var stem = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                Object.DestroyImmediate(stem.GetComponent<Collider>());
+                stem.name = "Stem";
+                stem.transform.SetParent(tomato, false);
+                stem.transform.localPosition = new Vector3(0f, 0.47f, 0f);
+                stem.transform.localScale = new Vector3(0.09f, 0.08f, 0.09f);
+                stem.GetComponent<Renderer>().sharedMaterial = Mat("stem", new Color(0.25f, 0.45f, 0.15f), 0.3f);
+            }
+
+            var iron = Mat("castIron", new Color(0.16f, 0.16f, 0.17f), 0.55f, 0.45f);
+            Visual(root.Find("Pan"), Shapes.Pan(), iron, new Vector3(0f, -0.004f, 0f), keep: "Pan Handle");
+            Visual(root.Find("Bowl"), Shapes.Bowl(), Mat("bowlGlaze", new Color(0.32f, 0.52f, 0.78f), 0.85f), new Vector3(0f, -0.005f, 0f));
+            Visual(root.Find("Oil Bottle"), Shapes.Bottle(), Mat("oilGlass", new Color(0.92f, 0.78f, 0.3f), 0.95f), Vector3.zero);
+            Visual(root.Find("Salt Shaker"), Shapes.Shaker(), Mat("saltShaker", new Color(0.96f, 0.96f, 0.96f), 0.9f), Vector3.zero);
+            Visual(root.Find("Pepper Shaker"), Shapes.Shaker(), Mat("pepperShaker", new Color(0.18f, 0.16f, 0.15f), 0.8f), Vector3.zero);
+            var knifeBlade = root.Find("Knife/Knife Blade");
+            if (knifeBlade != null) knifeBlade.GetComponent<Renderer>().sharedMaterial = Mat("bladeSteel", new Color(0.86f, 0.87f, 0.9f), 0.85f, 0.5f);
+        }
+
+        static void Texture(Transform root, string child, string tex, Vector2 tiling, Color tint, float gloss)
+        {
+            var t = root.Find(child);
+            if (t == null) return;
+            var m = Mat("tex_" + tex, tint, gloss);
+            var diff = Resources.Load<Texture2D>("Textures/" + tex + "_diff");
+            var nor = Resources.Load<Texture2D>("Textures/" + tex + "_nor");
+            if (diff != null) { m.mainTexture = diff; m.mainTextureScale = tiling; }
+            if (nor != null) { m.SetTexture("_BumpMap", nor); m.SetTextureScale("_BumpMap", tiling); m.EnableKeyword("_NORMALMAP"); }
+            t.GetComponent<Renderer>().sharedMaterial = m;
+        }
+
+        static void SwapMesh(Transform root, string child, Mesh mesh)
+        {
+            var t = root.Find(child);
+            if (t != null) t.GetComponent<MeshFilter>().sharedMesh = mesh;
+        }
+
+        /// Hide the physics pieces' renderers and show one smooth mesh instead (colliders are untouched).
+        static void Visual(Transform owner, Mesh mesh, Material mat, Vector3 localOffset, string keep = null)
+        {
+            if (owner == null) return;
+            foreach (var r in owner.GetComponentsInChildren<Renderer>())
+                if (keep == null || r.name != keep) r.enabled = false;
+            var go = new GameObject(owner.name + " Visual");
+            go.transform.SetParent(owner, false);
+            go.transform.localPosition = localOffset;
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            go.AddComponent<MeshRenderer>().sharedMaterial = mat;
         }
 
         // --- composite tools -------------------------------------------------
@@ -208,11 +275,12 @@ namespace LetsCook
             item.kind = kind;
         }
 
-        public static Material Mat(string key, Color color, float gloss)
+        public static Material Mat(string key, Color color, float gloss, float metallic = 0f)
         {
             if (materials.TryGetValue(key, out var m) && m != null) return m;
             m = new Material(Shader.Find("Standard")) { name = key, color = color };
             m.SetFloat("_Glossiness", gloss);
+            m.SetFloat("_Metallic", metallic);
             materials[key] = m;
             return m;
         }

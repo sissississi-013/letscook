@@ -32,14 +32,38 @@ namespace LetsCook.EditorTools
             camGo.transform.LookAt(new Vector3(-0.02f, 0.88f, 0.5f));
             camGo.AddComponent<AudioListener>();
 
+            // Warm window light from the upper left, soft cool fill from the right, gentle sky/ground ambient.
             var sun = new GameObject("Key Light").AddComponent<Light>();
             sun.type = LightType.Directional;
-            sun.intensity = 0.95f;
-            sun.color = new Color(1f, 0.96f, 0.9f);
+            sun.intensity = 1.15f;
+            sun.color = new Color(1f, 0.93f, 0.82f);
             sun.shadows = LightShadows.Soft;
-            sun.transform.rotation = Quaternion.Euler(55f, -30f, 0f);
-            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.55f, 0.52f, 0.5f);
+            sun.shadowStrength = 0.85f;
+            sun.shadowBias = 0.02f;
+            sun.shadowNormalBias = 0.15f;
+            sun.transform.rotation = Quaternion.Euler(52f, -35f, 0f);
+            var fill = new GameObject("Fill Light").AddComponent<Light>();
+            fill.type = LightType.Directional;
+            fill.intensity = 0.35f;
+            fill.color = new Color(0.8f, 0.88f, 1f);
+            fill.shadows = LightShadows.None;
+            fill.transform.rotation = Quaternion.Euler(30f, 140f, 0f);
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.62f, 0.64f, 0.66f);
+            RenderSettings.ambientEquatorColor = new Color(0.55f, 0.5f, 0.45f);
+            RenderSettings.ambientGroundColor = new Color(0.3f, 0.26f, 0.22f);
+            var probe = new GameObject("Reflection Probe").AddComponent<ReflectionProbe>();
+            probe.transform.position = new Vector3(0f, 1.2f, 0.4f);
+            probe.size = new Vector3(3f, 2f, 3f);
+            probe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
+            probe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.OnAwake;
+            probe.resolution = 128;
+            QualitySettings.shadowDistance = 3f;
+            QualitySettings.shadowResolution = ShadowResolution.VeryHigh;
+            QualitySettings.shadowCascades = 2;
+            QualitySettings.antiAliasing = 4;
+            QualitySettings.shadows = ShadowQuality.All;
+            QualitySettings.realtimeReflectionProbes = true;
 
             Kitchen.Build();   // first: the rig below looks up kitchen objects (the plate)
             var rig = new GameObject("Glove Rig");
@@ -84,9 +108,20 @@ namespace LetsCook.EditorTools
             Debug.Log("[let's cook] Built " + ScenePath);
         }
 
-        /// Materials made in code must become assets, or the saved scene loses them.
+        /// Materials and meshes made in code must become assets, or the saved scene loses them.
         static void SaveMaterials()
         {
+            const string meshDir = "Assets/LetsCook/Meshes";
+            Directory.CreateDirectory(meshDir);
+            foreach (var mf in UnityEngine.Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+            {
+                var mesh = mf.sharedMesh;
+                if (mesh == null || AssetDatabase.Contains(mesh)) continue;
+                string meshPath = $"{meshDir}/{mesh.name}.asset";
+                var existing = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
+                if (existing != null) { EditorUtility.CopySerialized(mesh, existing); mf.sharedMesh = existing; }
+                else AssetDatabase.CreateAsset(mesh, meshPath);
+            }
             const string dir = "Assets/LetsCook/Materials";
             Directory.CreateDirectory(dir);
             foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
