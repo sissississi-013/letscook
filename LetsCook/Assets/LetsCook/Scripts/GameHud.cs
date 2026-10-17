@@ -58,6 +58,6 @@ namespace LetsCook
             return string.Join("   ·   ", parts);
         }
 
-        public static string Controls = "hands: WASD move · Q/E down/up · Z/C turn · Tab switch hand · Space both  |  B burner · +/- heat  |  T ask for any tool  |  Enter serve the plate  |  K recalibrate gloves";
+        public static string Controls = "hands: WASD move · Q/E down/up · Z/C turn · Tab switch hand · Space both  |  B burner · +/- heat  |  T ask for any tool  |  Enter serve the plate  |  K recalibrate gloves  |  R fresh kitchen";
     }
 }

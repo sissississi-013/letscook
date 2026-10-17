@@ -8,7 +8,7 @@ LeRobot's own `convert_dataset_v21_to_v30` script upgrades it to v3.
 Frames: Unity is left-handed Y-up. Output world frame is right-handed Z-up (x right, y forward, z up), metres,
 quaternions [x, y, z, w]. Per hand, observation.state = wrist pos (3) + wrist quat (4) + 21 keypoints in the
 wrist frame (63) → 70; both hands → 140. action = observation.state at t+1.
-Episodes are split at "plate" events (a served dish ends an episode); otherwise the whole session is one episode.
+Episodes are split at "plate" and "reset" events (a served dish ends an episode); otherwise the whole session is one episode.
 """
 import argparse
 import json
@@ -95,7 +95,7 @@ def load(path):
 
 
 def split_episodes(frames, events):
-    cuts = sorted(e["t"] for e in events if e["event"] == "plate")
+    cuts = sorted(e["t"] for e in events if e["event"] in ("plate", "reset"))
     episodes, current, i = [], [], 0
     for fr in frames:
         while i < len(cuts) and fr["t"] > cuts[i]:

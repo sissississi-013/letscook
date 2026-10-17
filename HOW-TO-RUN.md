@@ -42,9 +42,10 @@ If no stream arrives for 2 s, the game plays a built-in hand animation, and the 
 | Z / C | turn hands |
 | Tab / Space | move one hand / both hands |
 | B, + / − | burner on/off, heat level |
-| T | ask for **any tool** (type it, Enter) |
+| T | ask for **any tool**: type it (or press **Fn twice** for macOS dictation and say it), Enter |
 | Enter | **serve** what's on the plate → Claude names it and unlocks a recipe |
 | Esc | close the dish card |
+| R | fresh kitchen (new ingredients, tools back in place); also ends the robot-data episode |
 | K | recalibrate the gloves through Rokoko Studio (turn on Studio → Settings → Command API; hold the calibration pose for the 3 s countdown) |
 
 Your **cookbook**: every served dish is saved with a photo. Open it with `open cookbook/index.html`.
@@ -63,7 +64,7 @@ Every Play session writes `sessions/unity-<time>.jsonl` (30 fps: hands, objects,
 ```bash
 .venv/bin/python tools/to_lerobot.py sessions/unity-XXXX.jsonl datasets/letscook-001
 ```
-Episodes are split each time you serve a plate. Frames where the game held an object for you are flagged (`quality.assist_active`), and so are frames driven by mock hands (`quality.glove_live = false`).
+Episodes are split each time you serve a plate or reset the kitchen. Frames where the game held an object for you are flagged (`quality.assist_active`), and so are frames driven by mock hands (`quality.glove_live = false`).
 
 ## Developer commands
 ```bash

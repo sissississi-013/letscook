@@ -136,3 +136,8 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - "Next idea" (top right): the recipe the last dish unlocked. It loads from the cookbook at game start (`GET /latest-unlock` on the chef server) and updates after each served dish (not for offline placeholder names).
 - Chef prompt now mentions seasoning, oil, cracked eggs. Troubleshooting for hand orientation/drift.
 - Evidence: pytest 34/34 incl. `test_latest_unlock_endpoint` (real HTTP server); Unity 32/32.
+
+### 16:23 Fresh kitchen + voice via dictation ✅
+- `KitchenReset.cs`: **R** releases held objects, clears requested tools, food pieces, spilled eggs and shells, rebuilds the kitchen, re-points plating at the new plate, emits `reset`. `to_lerobot.py` now also splits episodes at `reset`.
+- Voice for tool requests: the T text box accepts macOS dictation (Fn twice), documented. **Claude's call:** dictation instead of a custom speech pipeline (no extra install or permission).
+- Evidence: PlayMode 17/17 incl. `ResetGivesAFreshKitchen`; pytest 34/34.
