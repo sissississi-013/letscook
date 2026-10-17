@@ -16,3 +16,4 @@ cookbook.json
 build/
 models/
 cookbook/
+.venv-robot/

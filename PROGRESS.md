@@ -122,3 +122,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `Consent.cs`: before anything is recorded, an overlay explains what's saved (hand motion, kitchen, two counter videos; no camera image of the player; stays local unless shared as an open dataset; deletion on request). **Y** enables the SessionLogger, **N** plays without recording. The logger is saved disabled in the scene, so no file exists before consent. `-consent yes|no` skips the question; autopilot runs count as yes. HUD shows "● recording" / "not recording".
 - **Claude's call:** consent wording (draft; organizers should review it, see research/robot-data.md §7). `receiver.py` still records raw glove data whenever it runs (documented).
 - Evidence: PlayMode 14/14 incl. `NothingIsRecordedUntilThePlayerAgrees`; scene file has the logger `m_Enabled: 0`.
+
+### 16:14 Kitchen sound ✅
+- `KitchenAudio.cs` (procedural, no audio files): a looping sizzle (filtered hiss + random oil pops) whose volume follows food touching a pan above 100 °C, louder while the food is still wet; chop burst on `cut`, sharp tick on `crack`, a bell on `plate`.
+- Evidence: PlayMode 15/15 incl. `PanSizzlesOnlyWithFoodOnHeat` (hot empty pan quiet; bread in the pan → sizzle > 0.2).
