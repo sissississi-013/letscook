@@ -6,6 +6,7 @@ POST /dish   {"summary": {...}, "screenshot_b64": "<png base64, optional>"}
              → {"dish_name", "course", "description", "chef_note", "unlock": {...}, "offline": bool}
 POST /tool   {"request": "a mortar and pestle"}
              → {"source": "library" | "claude" | "offline", "tool": {name, mass_kg, abilities, parts: [...]}}
+GET  /latest-unlock → the recipe idea unlocked by the last dish ({} if none)
 GET  /cookbook → every dish so far (cookbook.json); cookbook/index.html is the readable page with photos
 
 The API key stays here (ANTHROPIC_API_KEY from the environment); Unity never sees it.
@@ -314,6 +315,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/cookbook":
             return self._send(200, load_cookbook())
+        if self.path == "/latest-unlock":
+            book = load_cookbook()
+            return self._send(200, (book[-1]["dish"].get("unlock") or {}) if book else {})
         if self.path == "/health":
             return self._send(200, {"ok": True})
         self._send(404, {"error": "not found"})

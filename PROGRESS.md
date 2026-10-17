@@ -130,3 +130,9 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 ### 16:17 Cooking oil ✅
 - Oil bottle (reuses `Shaker` with `seasoning = "oil"`, about 4 g/s once tipped past sideways, opening at 13 cm). Oil poured into the pan collects as `Cookware.oil` (g) and shows as a golden layer that grows with the amount. `ContactBoost` (up to 1.8× heat transfer at 10 g) gives shallow-frying behaviour; food in an oiled pan soaks up a little oil ("cooked in oil" in its description and `oil_g` in the dish summary). Above 230 °C with oil in the pan: `smoke` event + "turn the heat down" warning.
 - Evidence: EditMode 16/16 incl. `OiledPanBrownsFasterThanDry` (0.42 vs 0.32 browning after 90 s at 200 °C); PlayMode 16/16 incl. `PouringOilCoatsThePanAndItSmokesWhenTooHot` (> 3 g in 2 s, stops when upright, smokes at 245 °C). `shots/m12-kitchen.png`.
+
+### 16:21 HUD + progression ✅
+- HUD bottom line: burner level, pan °C, oil grams, SMOKING warning, what each hand holds.
+- "Next idea" (top right): the recipe the last dish unlocked. It loads from the cookbook at game start (`GET /latest-unlock` on the chef server) and updates after each served dish (not for offline placeholder names).
+- Chef prompt now mentions seasoning, oil, cracked eggs. Troubleshooting for hand orientation/drift.
+- Evidence: pytest 34/34 incl. `test_latest_unlock_endpoint` (real HTTP server); Unity 32/32.

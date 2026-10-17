@@ -94,3 +94,16 @@ def test_cookbook_page_has_photo_and_escapes_names(tmp_path):
     assert 'src="photos/dish-001.png"' in page
     assert (tmp_path / "cookbook" / "photos" / "dish-001.png").read_bytes()[:4] == b"\x89PNG"
     assert "Unlocked:" in page and "Eggy Bread" in page
+
+
+def test_latest_unlock_endpoint():
+    import threading
+    from http.server import ThreadingHTTPServer
+    from urllib.request import urlopen
+    server = ThreadingHTTPServer(("127.0.0.1", 0), chef_server.Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    url = f"http://127.0.0.1:{server.server_address[1]}/latest-unlock"
+    assert json.loads(urlopen(url).read()) == {}
+    chef_server.name_dish(SUMMARY, client=fake_client(reply=DISH))
+    assert json.loads(urlopen(url).read())["recipe_name"] == "Eggy Bread"
+    server.shutdown()

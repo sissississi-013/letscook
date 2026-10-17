@@ -27,6 +27,23 @@ namespace LetsCook
         GUIStyle title, body;
         static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
+        /// The idea to try next: the last dish's unlock (loaded from the cookbook at start, updated after serving).
+        public Unlock NextIdea { get; private set; }
+
+        IEnumerator Start()
+        {
+            using (var req = UnityWebRequest.Get(chefUrl.Replace("/dish", "/latest-unlock")))
+            {
+                req.timeout = 3;
+                yield return req.SendWebRequest();
+                if (req.result == UnityWebRequest.Result.Success)
+                {
+                    var u = JsonUtility.FromJson<Unlock>(req.downloadHandler.text);
+                    if (!string.IsNullOrEmpty(u?.recipe_name)) NextIdea = u;
+                }
+            }
+        }
+
         void Update()
         {
             if (ToolRequester.Typing) return;
@@ -134,12 +151,24 @@ namespace LetsCook
                 }
             }
             CookEvents.Emit("plate", LastDish.dish_name, LastDish.course);
+            if (!LastDish.offline && LastDish.unlock != null) NextIdea = LastDish.unlock;
             shownUntil = Time.time + 12f;
             Busy = false;
         }
 
+        GUIStyle ideaStyle;
+
         void OnGUI()
         {
+            if (NextIdea != null && (LastDish == null || Time.time > shownUntil))
+            {
+                if (ideaStyle == null)
+                {
+                    ideaStyle = new GUIStyle(GUI.skin.label) { fontSize = 14, alignment = TextAnchor.UpperRight, wordWrap = true };
+                    ideaStyle.normal.textColor = new Color(0.35f, 0.2f, 0.1f);
+                }
+                GUI.Label(new Rect(Screen.width - 380, 10, 366, 60), $"next idea: {NextIdea.recipe_name} ({NextIdea.course})\n{NextIdea.first_step}", ideaStyle);
+            }
             if (LastDish == null || Time.time > shownUntil) return;
             if (title == null)
             {
