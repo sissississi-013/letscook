@@ -53,6 +53,7 @@ How to cook:
 - **Grab:** pinch the thumb and a finger around something (or close your hand on it). Open your fingers to let go.
 - **Cut:** chop food fast with the knife (or any tool with a blade).
 - **Cook:** put food in the pan on the lit burner. The pan takes about a minute to heat up, like real cast iron. Food dries, browns, sets, melts and burns based on temperature.
+- **Oil the pan:** tip the oil bottle (back right) past sideways over the pan. Oiled pans brown food faster and more evenly; above about 230 °C the oil smokes, so turn the heat down with −.
 - **Season:** pick up the salt or pepper shaker (back right) and turn it upside down over food; shake it for more.
 - **Crack an egg:** knock it on the pan rim or counter (or hit it with the knife). It spills into whatever is below and fries.
 - **Serve:** move food onto the white plate and press Enter.

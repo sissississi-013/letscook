@@ -50,6 +50,7 @@ namespace LetsCook
         public float melted;       // 0..1 (butter)
         public float secondsHeated;
         public float salt, pepper;   // grams on this piece
+        public float oil;            // grams of oil picked up (from an oiled pan or poured on)
         public float peakSurface;
 
         public FoodState(IngredientProfile p)
@@ -63,10 +64,12 @@ namespace LetsCook
         public FoodState Clone() => (FoodState)MemberwiseClone();
 
         /// contactTemp: temperature of a hot surface the food is touching, or null if only air.
-        public void Step(float dt, float? contactTemp)
+        /// contactBoost > 1 when the pan is oiled: oil fills the gaps between food and metal, so heat flows faster
+        /// and browning is more even (shallow frying).
+        public void Step(float dt, float? contactTemp, float contactBoost = 1f)
         {
             float target = contactTemp ?? Ambient;
-            float rate = contactTemp.HasValue ? ContactRate : AirRate;
+            float rate = contactTemp.HasValue ? ContactRate * contactBoost : AirRate;
             float next = surfaceTemp + (target - surfaceTemp) * (1f - Mathf.Exp(-rate * dt));
 
             // Water pins the surface at 100 °C while it boils off: no browning until the surface dries.
@@ -111,6 +114,7 @@ namespace LetsCook
                 var parts = new System.Collections.Generic.List<string>();
                 var s = Amount(salt, "salted"); if (s != null) parts.Add(s);
                 var p = Amount(pepper, "peppered"); if (p != null) parts.Add(p);
+                if (oil > 0.2f) parts.Add(oil > 3f ? "oily" : "cooked in oil");
                 return string.Join(", ", parts);
             }
         }

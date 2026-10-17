@@ -47,6 +47,20 @@ namespace LetsCook
                 shaker.AddComponent<Shaker>().seasoning = name;
             }
 
+            var bottle = new GameObject("Oil Bottle");
+            bottle.transform.SetParent(root, false);
+            bottle.transform.position = new Vector3(0.7f, CounterTop + 0.09f, 0.62f);
+            Disc(bottle.transform, "Oil Body", bottle.transform.position, 0.032f, 0.16f, Mat("oilGlass", new Color(0.92f, 0.78f, 0.3f), 0.95f));
+            Disc(bottle.transform, "Oil Neck", bottle.transform.position + Vector3.up * 0.1f, 0.012f, 0.05f, Mat("oilGlass", new Color(0.92f, 0.78f, 0.3f), 0.95f));
+            Tag(bottle, "oil bottle", ItemKind.Tool);
+            Physical(bottle, 0.6f);
+            var pourer = bottle.AddComponent<Shaker>();
+            pourer.seasoning = "oil";
+            pourer.tippedFlow = 4f;     // g/s: a steady glug
+            pourer.shakeFlow = 0f;
+            pourer.pourTilt = 0.05f;    // just past sideways
+            pourer.capOffset = 0.13f;
+
             // Ingredients
             Ingredient(Sphere(root, "Tomato", new Vector3(-0.25f, CounterTop + 0.06f, 0.45f), new Vector3(0.07f, 0.062f, 0.07f), Mat("tomato", new Color(0.86f, 0.16f, 0.1f), 0.75f)), "tomato", 0.12f);
             Ingredient(Sphere(root, "Onion", new Vector3(-0.1f, CounterTop + 0.06f, 0.47f), new Vector3(0.075f, 0.068f, 0.075f), Mat("onion", new Color(0.82f, 0.62f, 0.34f), 0.5f)), "onion", 0.15f);

@@ -9,6 +9,8 @@ namespace LetsCook
         public string seasoning = "salt";
         public float tippedFlow = 0.15f;   // g/s while upside down
         public float shakeFlow = 1.2f;     // extra g/s at a vigorous shake
+        public float capOffset = 0.055f;   // distance from the centre to the opening, along local up
+        public float pourTilt = 0.3f;      // how upside down before anything comes out (0 = sideways, 1 = straight down)
 
         Rigidbody rb;
         Vector3 lastVelocity;
@@ -20,7 +22,7 @@ namespace LetsCook
         void Awake()
         {
             rb = GetComponent<Rigidbody>();
-            grains = MakeGrains(seasoning == "pepper" ? new Color(0.15f, 0.12f, 0.1f) : Color.white);
+            grains = MakeGrains(seasoning == "pepper" ? new Color(0.15f, 0.12f, 0.1f) : seasoning == "oil" ? new Color(0.95f, 0.75f, 0.2f) : Color.white);
         }
 
         void FixedUpdate()
@@ -30,9 +32,9 @@ namespace LetsCook
             lastVelocity = v;
 
             float tilt = Vector3.Dot(transform.up, Vector3.down);   // 1 = fully upside down
-            if (tilt < 0.3f) return;
+            if (tilt < pourTilt) return;
             float shake = Mathf.Clamp01((accel - 2f) / 10f);
-            float grams = (tippedFlow * tilt + shakeFlow * shake) * Time.fixedDeltaTime;
+            float grams = (tippedFlow * Mathf.Clamp01(tilt - pourTilt + 0.3f) + shakeFlow * shake) * Time.fixedDeltaTime;
             Pour(grams);
         }
 
@@ -42,11 +44,18 @@ namespace LetsCook
             if (grams <= 0f) return;
             GramsDispensed += grams;
             pendingGrams += grams;
-            Vector3 cap = transform.position + transform.up * 0.055f;   // just past the cap
+            Vector3 cap = transform.position + transform.up * capOffset;
             if (grains != null) { grains.transform.position = cap; grains.Emit(Mathf.Max(1, Mathf.RoundToInt(grams * 60f))); }
 
             if (Physics.Raycast(cap + Vector3.down * 0.01f, Vector3.down, out var hit, 0.6f))
             {
+                var pan = hit.collider.GetComponentInParent<Cookware>();
+                if (pan != null && seasoning == "oil")
+                {
+                    pan.AddOil(grams);
+                    if (pendingGrams > 2f) { CookEvents.Emit("pour", "oil", "pan"); pendingGrams = 0f; }
+                    return;
+                }
                 var food = hit.collider.GetComponentInParent<Food>();
                 if (food != null)
                 {

@@ -46,10 +46,17 @@ namespace LetsCook
         void FixedUpdate()
         {
             float? contact = null;
+            float boost = 1f;
             foreach (var pan in touching)
-                if (pan != null) contact = Mathf.Max(contact ?? float.MinValue, pan.temperature);
+                if (pan != null)
+                {
+                    contact = Mathf.Max(contact ?? float.MinValue, pan.temperature);
+                    boost = Mathf.Max(boost, pan.ContactBoost);
+                    if (pan.oil > 1f && pan.temperature > 60f && state.oil < 2f)
+                        state.oil += 0.02f * Time.fixedDeltaTime * TimeScale;   // food soaks up a little oil
+                }
             touching.Clear();
-            state.Step(Time.fixedDeltaTime * TimeScale, contact);
+            state.Step(Time.fixedDeltaTime * TimeScale, contact, boost);
         }
 
         void Update() => ApplyLook();
@@ -66,7 +73,9 @@ namespace LetsCook
 
         public void Season(string seasoning, float grams)
         {
-            if (seasoning == "pepper") state.pepper += grams; else state.salt += grams;
+            if (seasoning == "pepper") state.pepper += grams;
+            else if (seasoning == "oil") state.oil += grams;
+            else state.salt += grams;
         }
 
         /// One line for the dish summary / robot labels.

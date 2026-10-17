@@ -71,6 +71,7 @@ namespace LetsCook
                   .Append(",\"seconds_on_heat\":").Append(Mathf.Round(s.secondsHeated).ToString(Inv))
                   .Append(",\"salt_g\":").Append(s.salt.ToString("0.00", Inv))
                   .Append(",\"pepper_g\":").Append(s.pepper.ToString("0.00", Inv))
+                  .Append(",\"oil_g\":").Append(s.oil.ToString("0.00", Inv))
                   .Append(",\"seasoning\":").Append(Q(s.Seasoning)).Append('}');
             }
             sb.Append("],\"events\":{");

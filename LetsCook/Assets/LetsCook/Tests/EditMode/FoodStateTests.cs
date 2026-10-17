@@ -61,6 +61,15 @@ namespace LetsCook.Tests
         }
 
         [Test]
+        public void OiledPanBrownsFasterThanDry()
+        {
+            var dry = new FoodState(IngredientProfile.For("bread"));
+            var oiled = new FoodState(IngredientProfile.For("bread"));
+            for (float t = 0; t < 90f; t += 0.02f) { dry.Step(0.02f, 200f); oiled.Step(0.02f, 200f, 1.8f); }
+            Assert.Greater(oiled.browning, dry.browning + 0.05f);
+        }
+
+        [Test]
         public void ColourDarkensWithBrowning()
         {
             var raw = new FoodState(IngredientProfile.For("bread"));
