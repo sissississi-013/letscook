@@ -11,5 +11,4 @@ LetsCook/*.csproj
 LetsCook/*.sln
 .DS_Store
 .venv/
-shots/
 logs/

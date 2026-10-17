@@ -27,13 +27,14 @@ namespace LetsCook.EditorTools
             cam.backgroundColor = new Color(0.97f, 0.93f, 0.86f);
             cam.fieldOfView = 50f;
             cam.nearClipPlane = 0.02f;
-            camGo.transform.position = new Vector3(0f, 1.42f, -0.22f);
-            camGo.transform.LookAt(new Vector3(0f, 0.93f, 0.48f));
+            cam.fieldOfView = 55f;
+            camGo.transform.position = new Vector3(0f, 1.5f, -0.25f);
+            camGo.transform.LookAt(new Vector3(-0.02f, 0.88f, 0.5f));
             camGo.AddComponent<AudioListener>();
 
             var sun = new GameObject("Key Light").AddComponent<Light>();
             sun.type = LightType.Directional;
-            sun.intensity = 1.1f;
+            sun.intensity = 0.95f;
             sun.color = new Color(1f, 0.96f, 0.9f);
             sun.shadows = LightShadows.Soft;
             sun.transform.rotation = Quaternion.Euler(55f, -30f, 0f);
@@ -45,7 +46,10 @@ namespace LetsCook.EditorTools
             MakeHand(rig.transform, receiver, "Left", LeftWrist);
             MakeHand(rig.transform, receiver, "Right", RightWrist);
 
+            Kitchen.Build();
+            rig.AddComponent<GameHud>().receiver = receiver;
             KitchenHook?.Invoke(scene);
+            SaveMaterials();
 
             Directory.CreateDirectory("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -53,7 +57,24 @@ namespace LetsCook.EditorTools
             Debug.Log("[let's cook] Built " + ScenePath);
         }
 
-        /// Later milestones add the kitchen here.
+        /// Materials made in code must become assets, or the saved scene loses them.
+        static void SaveMaterials()
+        {
+            const string dir = "Assets/LetsCook/Materials";
+            Directory.CreateDirectory(dir);
+            foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+            {
+                var m = r.sharedMaterial;
+                if (m == null || AssetDatabase.Contains(m)) continue;
+                string path = $"{dir}/{m.name}.mat";
+                var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+                if (existing != null) { EditorUtility.CopySerialized(m, existing); r.sharedMaterial = existing; }
+                else AssetDatabase.CreateAsset(m, path);
+            }
+            AssetDatabase.SaveAssets();
+        }
+
+        /// Later milestones can add more to the scene here.
         public static Action<Scene> KitchenHook;
 
         static void MakeHand(Transform parent, RokokoReceiver receiver, string side, Vector3 wrist)
