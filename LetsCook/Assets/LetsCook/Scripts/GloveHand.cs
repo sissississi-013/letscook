@@ -19,6 +19,8 @@ namespace LetsCook
         Material material;
 
         public GloveFrame Frame { get; private set; }
+        /// Wrist rotation in game space (glove rotation turned by the anchor).
+        public Quaternion WristRotation { get; private set; } = Quaternion.identity;
         public bool HasPose => positions.Count > 0;
 
         /// Game-space position of a joint (e.g. "LeftFinger2Tip"), after anchoring.
@@ -36,6 +38,7 @@ namespace LetsCook
             Frame = frame;
             Vector3 origin = anchor != null ? anchor.position : transform.position;
             Quaternion turn = anchor != null ? anchor.rotation : Quaternion.identity;
+            WristRotation = turn * wrist.rotation;
 
             foreach (var kv in frame.joints)
             {

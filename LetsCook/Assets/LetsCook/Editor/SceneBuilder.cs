@@ -43,8 +43,9 @@ namespace LetsCook.EditorTools
 
             var rig = new GameObject("Glove Rig");
             var receiver = rig.AddComponent<RokokoReceiver>();
-            MakeHand(rig.transform, receiver, "Left", LeftWrist);
-            MakeHand(rig.transform, receiver, "Right", RightWrist);
+            var wrists = rig.AddComponent<WristController>();
+            wrists.left = MakeHand(rig.transform, receiver, "Left", LeftWrist);
+            wrists.right = MakeHand(rig.transform, receiver, "Right", RightWrist);
 
             Kitchen.Build();
             rig.AddComponent<GameHud>().receiver = receiver;
@@ -77,7 +78,7 @@ namespace LetsCook.EditorTools
         /// Later milestones can add more to the scene here.
         public static Action<Scene> KitchenHook;
 
-        static void MakeHand(Transform parent, RokokoReceiver receiver, string side, Vector3 wrist)
+        static Transform MakeHand(Transform parent, RokokoReceiver receiver, string side, Vector3 wrist)
         {
             var anchor = new GameObject(side + "WristAnchor").transform;
             anchor.SetParent(parent, false);
@@ -87,6 +88,8 @@ namespace LetsCook.EditorTools
             hand.side = side;
             hand.receiver = receiver;
             hand.anchor = anchor;
+            hand.gameObject.AddComponent<HandGrasp>();
+            return anchor;
         }
 
         public static void Shot()

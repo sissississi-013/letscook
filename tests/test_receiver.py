@@ -72,9 +72,17 @@ def test_quaternions_are_unit():
         assert math.isclose(r["x"] ** 2 + r["y"] ** 2 + r["z"] ** 2 + r["w"] ** 2, 1.0, abs_tol=1e-5)
 
 
-def test_pinch_brings_thumb_and_index_closer():
-    def gap(pose):
+def test_pinch_closes_thumb_and_index_on_both_hands():
+    def gap(pose, side):
         n = joints_by_name(mock_glove.make_frame(0, pose))
-        a, b = n["LeftFinger1Tip"]["position"], n["LeftFinger2Tip"]["position"]
+        a, b = n[f"{side}Finger1Tip"]["position"], n[f"{side}Finger2Tip"]["position"]
         return math.dist((a["x"], a["y"], a["z"]), (b["x"], b["y"], b["z"]))
-    assert gap("pinch") < gap("open")
+    for side in ("Left", "Right"):
+        assert gap("pinch", side) < 0.015
+        assert gap("open", side) > 0.06
+
+
+def test_thumb_sits_on_the_inner_side():
+    n = joints_by_name(mock_glove.make_frame(0, "open"))
+    assert n["LeftFinger1Tip"]["position"]["x"] > n["LeftHand"]["position"]["x"]
+    assert n["RightFinger1Tip"]["position"]["x"] < n["RightHand"]["position"]["x"]

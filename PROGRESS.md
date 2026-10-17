@@ -6,7 +6,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - [x] M1 Mock gloves
 - [x] M2 Unity project + glove receiver
 - [x] M3 Kitchen
-- [ ] M4 Grab anything
+- [x] M4 Grab anything
 - [ ] M5 Cooking state
 - [ ] M6 Cutting
 - [ ] M7 Session logging for robots
@@ -36,8 +36,15 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `./unity.sh build | shot <pose> <name> | test` wraps batch mode (refuses if the project is open in the Editor).
 - Evidence: EditMode 4/4 passed (parse, v3 rejection, curl per pose, lerp); PlayMode 1/1 passed (real UDP packet → receiver goes live, 50 joints, fist curl > 0.9). Screenshot `shots/m2-pinch.png` shows both hands.
 
-### 15:08 M3 Kitchen ✅
+### 15:01 M3 Kitchen ✅
 - `Kitchen.cs` builds the counter (top at y = 0.9 m), backsplash, burner, cutting board, pan (base + 16-segment wall ring + handle), bowl, plate, knife (blade has `KnifeEdge`), spatula; ingredients tomato, onion, egg, butter, bread with `Food` + Rigidbody. Every object has a `KitchenItem` name for logging.
 - Containers are rings of convex boxes so food can sit inside (convex collider limit).
 - `GameHud` shows glove status + controls in play mode. Materials saved to `Assets/LetsCook/Materials`.
 - Evidence: `shots/m3-kitchen.png`.
+
+### 15:12 M4 Grab anything ✅
+- `HandGrasp.cs`: kinematic fingertip + palm spheres follow the glove; grab = thumb tip + an opposing fingertip within 1.6 cm of the same non-kinematic `KitchenItem` and grip curl > 0.3; attach with a breakable `FixedJoint` (250 N) to a kinematic grip body that follows the fingers and wrist rotation; release when curl < 0.2 or the joint breaks. Collisions between hand and held object are ignored while held. `Held`/`Assisted` exposed for logging.
+- **Claude's call:** grab/release curl thresholds are 0.3/0.2, not the 0.8/0.7 in the research, because a real pinch only curls the index about 0.6.
+- `WristController.cs`: WASD/QE move wrists, Z/C turn, Tab switch hand, Space both.
+- Fixed the mock thumb (was on the outer side and never met the index); pinch gap now under 1.5 cm on both hands (pytest 10/10).
+- Evidence: PlayMode `PinchGrabsLiftsAndReleases` passes (open → no grab; pinch → grabs cube; hand rises 12 cm → cube rises > 8 cm; open → released and falls). Unity tests: EditMode 4/4, PlayMode 2/2.

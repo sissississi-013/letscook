@@ -85,12 +85,13 @@ def hand_joints(side, curls, start_index):
     for n in FINGERS:
         curl = curls[n - 1]
         if n == 1:
-            # Thumb starts at the inner side of the palm, angled forward, and curls across the palm
-            base = (wrist[0] + mirror * 0.025, wrist[1] - 0.01, wrist[2] + 0.02)
-            rot = quat_mul(hand_rot, quat_axis_angle((0, 1, 0), mirror * math.radians(-40)))
-            bend_axis = (0.3, 0, -mirror * 1.0)
+            # Thumb starts at the inner side of the palm, angled forward, and curls across under the palm.
+            # Parameters fitted so "pinch" brings thumb and index tips within about 1 cm.
+            base = (wrist[0] + mirror * 0.04, wrist[1] - 0.015, wrist[2])
+            rot = quat_mul(hand_rot, quat_axis_angle((0, 1, 0), mirror * math.radians(15)))
+            bend_axis = (1.0, -0.2 * mirror, -0.6 * mirror)  # mirrored as a pseudo-vector for the right hand
             names = ["Metacarpal", "Proximal", "Distal", "Tip"]
-            bends = [0.0, math.radians(55), math.radians(70)]
+            bends = [0.0, math.radians(70), math.radians(50)]
         else:
             base = (wrist[0] + mirror * BASE_X[n], wrist[1], wrist[2] + 0.01)
             rot = hand_rot
