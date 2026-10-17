@@ -111,3 +111,8 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - `StudioCommands.cs`: **K** → Rokoko Studio Command API `calibrate` (gloves only, 3 s countdown, pose straight-arms-down) at `127.0.0.1:14053/v1/1234`; toasts Studio's error text (e.g. plan not supported) or "turn on Command API" if unreachable; emits a `calibrate` event for the robot log.
 - Studio's Command API is listening on this Mac (14053); a read-only `info` call returned `null` (likely no scene open yet).
 - Evidence: PlayMode 13/13 incl. `UnreachableStudioFailsGracefully`.
+
+### 16:09 Robot-data video ✅
+- `SessionVideo.cs`: each logged frame renders the player's camera (**ego**) and a fixed side camera (**agentview**, disabled until needed) at 424×240 and pipes raw RGB into ffmpeg (`h264_videotoolbox`) on a background thread → `sessions/unity-<id>-video/{ego,agentview}.mp4`. Each log frame carries `video_frame`; meta lists `videos` and `video_dir`. Without ffmpeg, video is skipped.
+- `tools/to_lerobot.py` cuts each episode's frame range into `videos/chunk-000/observation.images.<view>/episode_XXXXXX.mp4` and adds the video features + `video_path` to info.json.
+- Evidence: PlayMode 13/13 (video files exist, frame-aligned); ffprobe: 73 video frames for 73 log frames, 424×240; extracted frame shows the kitchen upright. pytest 34/34 incl. `test_videos_are_cut_per_episode` (clip frames == data frames). Fixture video in `tests/fixtures/sample-session-video/`.

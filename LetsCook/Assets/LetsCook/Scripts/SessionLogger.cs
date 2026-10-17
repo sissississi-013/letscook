@@ -17,6 +17,7 @@ namespace LetsCook
         public GloveHand left, right;
         public float fps = 30f;
         public string directory;   // default: <repo>/sessions
+        public SessionVideo video; // optional: egocentric + agentview video, frame-aligned with the log
 
         public string FilePath { get; private set; }
         public int FramesWritten { get; private set; }
@@ -54,6 +55,7 @@ namespace LetsCook
             string id = "unity-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
             FilePath = Path.Combine(directory, id + ".jsonl");
             writer = new StreamWriter(FilePath, false, new UTF8Encoding(false)) { AutoFlush = false };
+            bool hasVideo = video != null && video.Begin(Path.Combine(directory, id + "-video"));
 
             var sb = new StringBuilder();
             sb.Append("{\"type\":\"meta\",\"session_id\":").Append(Q(id))
@@ -63,6 +65,8 @@ namespace LetsCook
               .Append(",\"rot_joints\":").Append(Names(RotJoints))
               .Append(",\"unity\":").Append(Q(Application.unityVersion))
               .Append(",\"started\":").Append(Q(DateTime.UtcNow.ToString("o")))
+              .Append(",\"video_dir\":").Append(hasVideo ? Q(id + "-video") : "null")
+              .Append(",\"videos\":").Append(hasVideo ? "[\"ego\",\"agentview\"]" : "[]")
               .Append('}');
             writer.WriteLine(sb.ToString());
             CookEvents.Emitted += OnEvent;
@@ -81,6 +85,7 @@ namespace LetsCook
         void OnDisable()
         {
             CookEvents.Emitted -= OnEvent;
+            video?.End();
             writer?.Flush();
             writer?.Dispose();
             writer = null;
@@ -95,15 +100,17 @@ namespace LetsCook
         {
             if (writer == null || Time.time < nextFrame) return;
             nextFrame = Mathf.Max(nextFrame + 1f / fps, Time.time);
-            writer.WriteLine(FrameJson());
+            int videoFrame = video != null ? video.Capture() : -1;
+            writer.WriteLine(FrameJson(videoFrame));
             FramesWritten++;
             if (FramesWritten % 30 == 0) writer.Flush();
         }
 
-        public string FrameJson()
+        public string FrameJson(int videoFrame = -1)
         {
             var sb = new StringBuilder(4096);
             sb.Append("{\"type\":\"frame\",\"t\":").Append(F(Time.time))
+              .Append(",\"video_frame\":").Append(videoFrame)
               .Append(",\"live\":").Append(receiver != null && receiver.IsLive ? "true" : "false")
               .Append(",\"hands\":{");
             Hand(sb, left); sb.Append(',');

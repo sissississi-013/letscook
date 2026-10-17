@@ -72,3 +72,15 @@ def test_plate_event_splits_episodes(tmp_path):
     session.write_text("\n".join(lines + [plate]) + "\n")
     info = tl.convert(session, tmp_path / "out")
     assert info["total_episodes"] == 2
+
+
+def test_videos_are_cut_per_episode(tmp_path):
+    import shutil, subprocess
+    if not shutil.which("ffprobe"):
+        return
+    info = tl.convert(FIXTURE, tmp_path)
+    assert "observation.images.ego" in info["features"]
+    clip = tmp_path / "videos" / "chunk-000" / "observation.images.ego" / "episode_000000.mp4"
+    n = int(subprocess.run(["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0", "-show_entries",
+                            "stream=nb_read_frames", "-of", "csv=p=0", str(clip)], capture_output=True, text=True).stdout.strip())
+    assert n == info["total_frames"], "one video frame per data frame"

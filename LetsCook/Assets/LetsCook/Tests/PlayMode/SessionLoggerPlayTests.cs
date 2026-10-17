@@ -29,7 +29,15 @@ namespace LetsCook.Tests
                 go.AddComponent<HandGrasp>();
                 return h;
             }
+            var cam = new GameObject("cam").AddComponent<Camera>();
+            cam.transform.SetParent(rig.transform);
+            cam.transform.position = new Vector3(0f, 1.5f, -0.25f);
+            cam.transform.LookAt(new Vector3(0f, 0.9f, 0.5f));
+            var video = rig.AddComponent<SessionVideo>();
+            video.ego = cam;
+            video.agent = cam;
             var logger = rig.AddComponent<SessionLogger>();
+            logger.video = video;
             logger.receiver = rx;
             logger.left = MakeHand("Left", new Vector3(-0.22f, 1.1f, 0.35f));
             logger.right = MakeHand("Right", new Vector3(0.22f, 1.1f, 0.35f));
@@ -56,9 +64,20 @@ namespace LetsCook.Tests
             Assert.That(frame, Does.Contain("\"contacts\":["));
             Assert.IsTrue(lines.Any(l => l.Contains("\"event\":\"cut\"")));
 
-            // Keep one session as a fixture for the Python converter tests.
+            Assert.That(frame, Does.Contain("\"video_frame\":"));
+            Assert.That(lines[0], Does.Contain("\"videos\":[\"ego\",\"agentview\"]"));
+            string videoDir = path.Replace(".jsonl", "-video");
+            Assert.IsTrue(File.Exists(Path.Combine(videoDir, "ego.mp4")), "ego video");
+            Assert.Greater(new FileInfo(Path.Combine(videoDir, "agentview.mp4")).Length, 1000, "agentview video has content");
+
+            // Keep one session (+ its video) as a fixture for the Python converter tests.
             File.Copy(path, Path.Combine(dir, "sample-session.jsonl"), true);
+            string fixtureVideo = Path.Combine(dir, "sample-session-video");
+            Directory.CreateDirectory(fixtureVideo);
+            foreach (var name in new[] { "ego.mp4", "agentview.mp4" })
+                File.Copy(Path.Combine(videoDir, name), Path.Combine(fixtureVideo, name), true);
             File.Delete(path);
+            Directory.Delete(videoDir, true);
         }
     }
 }

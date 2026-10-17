@@ -54,7 +54,18 @@ namespace LetsCook.EditorTools
             var plating = rig.AddComponent<Plating>();
             plating.plate = GameObject.Find("Plate").transform;
             plating.shotCamera = cam;
+            var agentCam = new GameObject("Agentview Camera").AddComponent<Camera>();
+            agentCam.enabled = false;   // only rendered on demand for the robot-data video
+            agentCam.fieldOfView = 55f;
+            agentCam.clearFlags = CameraClearFlags.SolidColor;
+            agentCam.backgroundColor = cam.backgroundColor;
+            agentCam.transform.position = new Vector3(0.95f, 1.45f, 0.05f);
+            agentCam.transform.LookAt(new Vector3(-0.05f, Kitchen.CounterTop, 0.5f));
+            var video = rig.AddComponent<SessionVideo>();
+            video.ego = cam;
+            video.agent = agentCam;
             var logger = rig.AddComponent<SessionLogger>();
+            logger.video = video;
             logger.receiver = receiver;
             logger.left = wrists.left.parent.Find("Left Hand").GetComponent<GloveHand>();
             logger.right = wrists.right.parent.Find("Right Hand").GetComponent<GloveHand>();

@@ -12,6 +12,8 @@ Episodes are split at "plate" events (a served dish ends an episode); otherwise 
 """
 import argparse
 import json
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -106,8 +108,26 @@ def split_episodes(frames, events):
     return episodes
 
 
+def find_videos(session_path, meta):
+    """{view: path} for the session's videos: <session>-video/ next to the log, else meta["video_dir"]."""
+    session_path = Path(session_path)
+    for d in (session_path.with_name(session_path.stem + "-video"), session_path.parent / str(meta.get("video_dir") or "")):
+        if meta.get("video_dir") and d.is_dir():
+            return {v: d / f"{v}.mp4" for v in meta.get("videos", []) if (d / f"{v}.mp4").exists()}
+    return {}
+
+
+def cut_clip(src, dst, first, last, fps):
+    """Frames first..last (inclusive) of src → dst, re-timed from zero."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(src),
+                    "-vf", f"select=between(n\\,{first}\\,{last}),setpts=N/{fps}/TB",
+                    "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", str(fps), str(dst)], check=True)
+
+
 def convert(session_path, out_dir, task="free play cooking"):
     meta, frames, events = load(session_path)
+    videos = find_videos(session_path, meta) if shutil.which("ffmpeg") else {}
     out = Path(out_dir)
     (out / "data" / "chunk-000").mkdir(parents=True, exist_ok=True)
     (out / "meta").mkdir(parents=True, exist_ok=True)
@@ -161,6 +181,10 @@ def convert(session_path, out_dir, task="free play cooking"):
             "annotation.food_state": pa.array(labels, pa.string()),
         })
         pq.write_table(table, out / "data" / "chunk-000" / f"episode_{ep_idx:06d}.parquet")
+        vf = [fr.get("video_frame", -1) for fr in ep if fr.get("video_frame", -1) >= 0]
+        for view, src in videos.items():
+            if vf:
+                cut_clip(src, out / "videos" / "chunk-000" / f"observation.images.{view}" / f"episode_{ep_idx:06d}.mp4", vf[0], vf[-1], int(fps))
         ep_events = [e for e in events if ep[0]["t"] <= e["t"] <= ep[-1]["t"]]
         episodes_meta.append({
             "episode_index": ep_idx,
@@ -189,6 +213,8 @@ def convert(session_path, out_dir, task="free play cooking"):
         "total_tasks": 1,
         "chunks_size": 1000,
         "data_path": "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet",
+        "video_path": "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4" if videos else None,
+        "total_videos": len(videos) * len(episodes_meta),
         "coordinate_frame": "right-handed, Z-up, metres; quaternions xyzw; converted from Unity (left-handed Y-up) by swapping y/z",
         "features": {
             "observation.state": {"dtype": "float32", "shape": [140], "names": joint_names},
@@ -201,6 +227,9 @@ def convert(session_path, out_dir, task="free play cooking"):
             "quality.tracking_ok": {"dtype": "bool", "shape": [2]},
             "quality.glove_live": {"dtype": "bool", "shape": [1], "note": "false = built-in mock animation, not a human"},
             "annotation.food_state": {"dtype": "string", "shape": [1], "note": "JSON: object → doneness"},
+            **{f"observation.images.{v}": {"dtype": "video", "shape": [240, 424, 3], "names": ["height", "width", "channel"],
+                                           "info": {"video.fps": fps, "video.codec": "h264", "note": "egocentric" if v == "ego" else "fixed third-person"}}
+               for v in videos},
             "timestamp": {"dtype": "float32", "shape": [1]},
             "frame_index": {"dtype": "int64", "shape": [1]},
             "episode_index": {"dtype": "int64", "shape": [1]},
