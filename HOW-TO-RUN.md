@@ -19,7 +19,7 @@ Full checklist: [glove-setup.md](glove-setup.md). In short:
 
 **Check the gloves before playing:** `.venv/bin/python glove_check.py` shows a live bar per finger (0 = straight, 1 = fist). Make a fist, open your hand, point: the bars should follow.
 
-If no stream arrives for 2 s, the game plays a built-in hand animation, and the top-left status says "mock hands".
+If no glove stream arrives, you play with the mouse: hold the left button to pinch with the right hand, the right button for the left hand.
 
 ## 2b. (Optional) Move your hands with the webcam
 ```bash
@@ -37,6 +37,7 @@ If no stream arrives for 2 s, the game plays a built-in hand animation, and the 
 
 | Key | What it does |
 |---|---|
+| Left / right mouse button (no gloves) | hold to close the right / left hand (pinch-grab); release to let go |
 | W A S D | move hands across the counter (when the wrist cam isn't running) |
 | Q / E | hands down / up |
 | Z / C | turn hands |

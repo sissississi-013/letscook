@@ -18,6 +18,10 @@ namespace LetsCook.Tests
             rx.port = 15045;
             go.SetActive(true);
             Assert.IsFalse(rx.IsLive);
+            Assert.IsTrue(rx.DrivesPhysics, "without gloves the mouse hands are solid");
+            Assert.AreEqual("mouse", rx.Latest.source);
+            Assert.AreEqual(50, rx.Latest.joints.Count);
+            Assert.Less(HandMath.Curl(rx.Latest, "Right", 2), 0.1f, "hands rest open");
 
             var json = Resources.Load<TextAsset>("MockFrames/mock_fist").text;
             using (var udp = new UdpClient())

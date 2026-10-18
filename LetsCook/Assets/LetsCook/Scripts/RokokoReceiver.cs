@@ -13,6 +13,9 @@ namespace LetsCook
     {
         public int port = 14045;
         public bool mockWhenSilent = true;
+        /// No gloves? Mouse buttons close the hands: left button = right-hand pinch, right button = left-hand pinch,
+        /// and these hands are solid (they grab and push), unlike the idle demo animation.
+        public bool mouseHandsWhenSilent = true;
         public float silentSeconds = 2f;
 
         UdpClient client;
@@ -38,15 +41,21 @@ namespace LetsCook
             {
                 if (IsLive) lock (gate) return latest;
                 if (injected != null) return injected;
+                if (MouseHands) return MouseFrame();
                 return mockWhenSilent ? MockFrame(Application.isPlaying ? Time.time : 0f) : null;
             }
         }
 
-        public string Status => IsLive ? $"LIVE gloves ({latest.source}) · {packets} packets" : (injected != null ? "injected frame" : "mock hands (no glove stream on :" + port + ")");
+        public string Status => IsLive ? $"LIVE gloves ({latest.source}) · {packets} packets"
+            : injected != null ? "injected frame"
+            : MouseHands ? "no gloves: hold left mouse = right hand grab, right mouse = left hand grab"
+            : "mock hands (no glove stream on :" + port + ")";
+
+        bool MouseHands => mouseHandsWhenSilent && Application.isPlaying && !IsLive && injected == null;
 
         /// Only real (or injected) glove data moves things. The idle mock animation is a ghost, so it can't
         /// knock the kitchen over while nobody is wearing the gloves.
-        public bool DrivesPhysics => IsLive || injected != null;
+        public bool DrivesPhysics => IsLive || injected != null || MouseHands;
 
         /// For tests and screenshots: force a frame regardless of the network.
         public void Inject(GloveFrame frame) => injected = frame;
@@ -102,17 +111,39 @@ namespace LetsCook
             }
         }
 
+        float leftClose, rightClose;   // 0 = open, 1 = pinch, eased so the fingers move like fingers
+
+        GloveFrame MouseFrame()
+        {
+            LoadMock();
+            float k = 1f - Mathf.Exp(-12f * Time.unscaledDeltaTime);
+            rightClose = Mathf.Lerp(rightClose, Input.GetMouseButton(0) ? 1f : 0f, k);
+            leftClose = Mathf.Lerp(leftClose, Input.GetMouseButton(1) ? 1f : 0f, k);
+            var open = mockFrames[0];
+            var pinch = mockFrames[3];
+            if (open == null || pinch == null) return null;
+            var left = GloveFrame.Lerp(open, pinch, leftClose);
+            var right = GloveFrame.Lerp(open, pinch, rightClose);
+            foreach (var kv in right.joints)
+                if (kv.Key.StartsWith("Right")) left.joints[kv.Key] = kv.Value;
+            left.source = "mouse";
+            return left;
+        }
+
+        void LoadMock()
+        {
+            if (mockFrames != null) return;
+            mockFrames = new GloveFrame[MockCycle.Length];
+            for (int i = 0; i < MockCycle.Length; i++)
+            {
+                var asset = Resources.Load<TextAsset>("MockFrames/mock_" + MockCycle[i]);
+                mockFrames[i] = asset != null ? GloveFrame.Parse(asset.text) : null;
+            }
+        }
+
         public GloveFrame MockFrame(float time)
         {
-            if (mockFrames == null)
-            {
-                mockFrames = new GloveFrame[MockCycle.Length];
-                for (int i = 0; i < MockCycle.Length; i++)
-                {
-                    var asset = Resources.Load<TextAsset>("MockFrames/mock_" + MockCycle[i]);
-                    mockFrames[i] = asset != null ? GloveFrame.Parse(asset.text) : null;
-                }
-            }
+            LoadMock();
             const float secondsPerPose = 1.5f;
             float phase = time / secondsPerPose;
             int i0 = (int)phase % MockCycle.Length;
