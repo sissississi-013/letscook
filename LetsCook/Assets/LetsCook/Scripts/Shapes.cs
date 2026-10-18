@@ -137,6 +137,66 @@ namespace LetsCook
         /// Rounded tool head/handle (outline in XZ).
         public static Mesh RoundedSlab() => Extrude("roundedSlab", RoundedRect(0.3f), 0, 2);
 
+        /// Half of a round food after a cut, in the halved piece's unit space: dome on one side of local axis
+        /// `axis`, a flat cut face on the other (submesh 1, for the flesh material). cutFacesPositive: the flat
+        /// face points along +axis (true) or -axis (false).
+        public static Mesh HalfRound(int axis, bool cutFacesPositive)
+        {
+            string name = $"half{axis}{(cutFacesPositive ? "+" : "-")}";
+            if (cache.TryGetValue(name, out var cached) && cached != null) return cached;
+            const int seg = 32, rings = 10;
+            var verts = new List<Vector3>(); var tris0 = new List<int>(); var tris1 = new List<int>();
+            // Canonical: flat face at y = -0.5 facing -y, dome up to y = +0.5 (the piece is half as thick, so the
+            // hemisphere fills the whole unit box along y).
+            for (int s2 = 0; s2 <= seg; s2++)
+            {
+                float a = s2 * Mathf.PI * 2f / seg;
+                for (int r = 0; r <= rings; r++)
+                {
+                    float th = Mathf.PI * 0.5f * r / rings;
+                    verts.Add(new Vector3(0.5f * Mathf.Sin(th) * Mathf.Cos(a), -0.5f + Mathf.Cos(th), 0.5f * Mathf.Sin(th) * Mathf.Sin(a)));
+                }
+            }
+            for (int s2 = 0; s2 < seg; s2++)
+                for (int r = 0; r < rings; r++)
+                {
+                    int i0 = s2 * (rings + 1) + r, i1 = (s2 + 1) * (rings + 1) + r;
+                    tris0.AddRange(new[] { i0, i1, i0 + 1, i1, i1 + 1, i0 + 1 });
+                }
+            int centre = verts.Count;
+            verts.Add(new Vector3(0f, -0.5f, 0f));
+            int rim = verts.Count;
+            for (int s2 = 0; s2 <= seg; s2++)
+            {
+                float a = s2 * Mathf.PI * 2f / seg;
+                verts.Add(new Vector3(0.5f * Mathf.Cos(a), -0.5f, 0.5f * Mathf.Sin(a)));
+            }
+            for (int s2 = 0; s2 < seg; s2++) tris1.AddRange(new[] { centre, rim + s2, rim + s2 + 1 });
+
+            // Rotate the canonical frame so -y becomes the cut direction.
+            Vector3 cutDir = Vector3.zero; cutDir[axis] = cutFacesPositive ? 1f : -1f;
+            var rot = Quaternion.FromToRotation(Vector3.down, cutDir);
+            for (int i = 0; i < verts.Count; i++) verts[i] = rot * verts[i];
+
+            var mesh = new Mesh { name = name, subMeshCount = 2 };
+            mesh.SetVertices(verts);
+            mesh.SetTriangles(tris0, 0);
+            mesh.SetTriangles(tris1, 1);
+            // Face the right way in Unity (clockwise = front): if the dome ended up inside-out, flip both submeshes.
+            mesh.RecalculateNormals();
+            var n = mesh.normals; var top = rot * new Vector3(0f, 0.5f, 0f);
+            int topIndex = rings == 0 ? 0 : 0;   // vertex 0 is the dome's top in canonical space
+            if (Vector3.Dot(n[topIndex], top) < 0f)
+            {
+                tris0.Reverse(); tris1.Reverse();
+                mesh.SetTriangles(tris0, 0); mesh.SetTriangles(tris1, 1);
+                mesh.RecalculateNormals();
+            }
+            mesh.RecalculateBounds();
+            cache[name] = mesh;
+            return mesh;
+        }
+
         // ---- food (unit sphere space: radius 0.5) -------------------------------------------------------
 
         /// Egg: blunt bottom, narrower top.

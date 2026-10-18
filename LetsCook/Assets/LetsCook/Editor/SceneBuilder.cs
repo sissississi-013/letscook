@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -204,6 +205,17 @@ namespace LetsCook.EditorTools
         static void StageCookedFood()
         {
             var pan = UnityEngine.Object.FindFirstObjectByType<Cookware>().transform.position;
+            // Halve the tomato and lay both halves cut-face up, to show the flesh.
+            var tomato = UnityEngine.Object.FindObjectsByType<Food>(FindObjectsSortMode.None).First(f => f.ingredient == "tomato");
+            var knife = UnityEngine.Object.FindFirstObjectByType<KnifeEdge>();
+            var half = knife.Cut(tomato, tomato.transform.right);
+            if (half != null)
+            {
+                tomato.transform.rotation = Quaternion.Euler(0f, 0f, -90f);   // its cut face (-x) turns up
+                half.transform.rotation = Quaternion.Euler(0f, 0f, 90f);      // its cut face (+x) turns up
+                tomato.transform.position = new Vector3(-0.02f, Kitchen.CounterTop + 0.04f, 0.33f);
+                half.transform.position = new Vector3(0.07f, Kitchen.CounterTop + 0.04f, 0.33f);
+            }
             foreach (var food in UnityEngine.Object.FindObjectsByType<Food>(FindObjectsSortMode.None))
             {
                 if (food.state == null || food.state.profile == null) food.Init(food.ingredient);
@@ -212,7 +224,7 @@ namespace LetsCook.EditorTools
                 {
                     case "bread": st.browning = 0.55f; food.transform.position = pan + new Vector3(-0.03f, 0.02f, 0f); break;
                     case "butter": st.melted = 0.8f; food.transform.position = pan + new Vector3(0.06f, 0.012f, 0.04f); break;
-                    case "tomato": st.browning = 1f; st.charred = 0.7f; break;
+                    case "tomato": break;
                     case "onion": st.set = 1f; st.browning = 0.3f; break;
                 }
                 var r = food.GetComponent<Renderer>();

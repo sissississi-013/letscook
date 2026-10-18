@@ -58,6 +58,13 @@ namespace LetsCook
             t.localScale = scale;
             piece.transform.localScale = scale;
 
+            if (food.cut == "whole" && (food.ingredient == "tomato" || food.ingredient == "onion"))
+            {
+                // Round food: give both halves a dome + a flesh-coloured cut face pointing at the cut.
+                var flesh = Kitchen.Mat("flesh_" + food.ingredient, food.ingredient == "tomato" ? new Color(0.93f, 0.38f, 0.3f) : new Color(0.96f, 0.93f, 0.84f), 0.7f);
+                ShowHalf(food, axis, false, flesh);    // food sits on the +axis side: its cut faces -axis
+                ShowHalf(piece, axis, true, flesh);    // piece sits on the -axis side: its cut faces +axis
+            }
             string cut = NextCut(food.cut);
             food.cut = piece.cut = cut;
             piece.state = food.state.Clone();
@@ -75,6 +82,16 @@ namespace LetsCook
             CookEvents.Emit("cut", food.ingredient, cut);
             GameHud.Toast($"sliced the {food.ingredient} ({cut})", 1f);
             return piece;
+        }
+
+        static void ShowHalf(Food f, int axis, bool cutFacesPositive, Material flesh)
+        {
+            var mf = f.GetComponent<MeshFilter>();
+            var r = f.GetComponent<Renderer>();
+            if (mf == null || r == null) return;
+            mf.sharedMesh = Shapes.HalfRound(axis, cutFacesPositive);
+            r.sharedMaterials = new[] { r.sharedMaterials[0], flesh };
+            foreach (Transform child in f.transform) if (child.name == "Stem") child.gameObject.SetActive(false);
         }
 
         static string NextCut(string cut)

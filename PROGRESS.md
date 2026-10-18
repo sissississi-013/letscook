@@ -186,3 +186,6 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - No gloves: the right hand follows the mouse cursor over the counter, placed so its thumb–index pinch point lands under the cursor; scroll wheel raises/lowers it; left button pinches. The left hand keeps WASD/QE + right button. HUD explains it.
 - Tests 33/33 still pass; mouse movement itself can't be simulated in batch mode.
 - 17:55: added PlayMode `PinchUnderTheCursorPicksUpTheTomato`. With the right wrist placed the way mouse mode places it (pinch point at the cursor, default height 1.0 m) over the real kitchen tomato, closing the hand grabs the tomato. PlayMode 18/18.
+
+### 17:58 Real cut faces ✅
+- Cutting a whole tomato or onion turns both pieces into hemispheres (`Shapes.HalfRound`, built in the halved piece's unit space, 6 axis/side variants) with a second submesh for the cut face in a flesh material (tomato: light red-pink; onion: creamy white). The stem hides. Food recolouring now keeps extra material slots. `shots/m17-cut.png` shows two halves cut-side up.

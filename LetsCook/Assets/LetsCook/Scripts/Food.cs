@@ -65,7 +65,13 @@ namespace LetsCook
         {
             if (rend == null) rend = GetComponent<Renderer>();
             if (rend == null) return;
-            if (mat == null) { mat = new Material(rend.sharedMaterial); rend.material = mat; }
+            if (mat == null || rend.sharedMaterials[0] != mat)
+            {
+                mat = new Material(rend.sharedMaterials[0]);
+                var mats = rend.sharedMaterials;   // keep extra slots (e.g. the flesh of a cut face)
+                mats[0] = mat;
+                rend.sharedMaterials = mats;
+            }
             mat.color = state.Color;
             if (state.profile.meltTemp > 0f && baseScale != Vector3.zero)
                 transform.localScale = new Vector3(baseScale.x * (1f + state.melted * 0.6f), baseScale.y * (1f - state.melted * 0.75f), baseScale.z * (1f + state.melted * 0.6f));
