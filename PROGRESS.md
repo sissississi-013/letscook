@@ -168,3 +168,10 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 ### 17:27 Real gloves: first Wi-Fi connection ✅
 - After updating Studio to 2.6.2.7 and several failed networks (iPhone hotspots invisible to the gloves, error 607), the **right glove joined xTribe_IoT and streamed to Studio at 66 frames/s** (Studio log 17:25:21), then dropped at 17:26 (likely unplugged with no power bank). Details in glove-setup.md.
 - Still to do with the user: power both gloves, set up the left glove, create a scene + actor, calibrate, start the Plus/Pro trial (Starter plan can't stream out), add Custom Streaming receivers 14043/14045, then `glove_check.py`.
+
+### 17:48 Play without gloves ✅
+- **Mouse hands:** with no glove stream, holding the left/right mouse button closes the right/left hand (eased open→pinch), and these hands are solid, so the game is fully playable with mouse + WASD.
+- **Webcam hands (`hand_cam.py`):** MediaPipe HandLandmarker (both hands, 21 points) → Rokoko JSON v4 frames to 14045 + 14043, plus wrist positions from the image to 14046. Unmirrored frame (MediaPipe's handedness label swapped accordingly); camera→game mapping is a proper handedness flip (det −1): fingers up → forward, palm to camera → palm down. Synthetic metacarpal joints.
+- User gave their Rokoko licence to a participant, so no live Studio streaming for now. **Claude's call:** not driving the gloves through Studio's internal device driver to bypass the subscription; options documented (Device SDK, recorded-take import, webcam hands).
+- Pushed to https://github.com/sissississi-013/letscook (public).
+- Evidence: Unity 33/33 (incl. mouse-hands defaults), pytest 39/39 (mapping, v4 names, receiver decodes the frame, per-hand parents, wrist mapping). **Webcam hands not yet tried with a real camera.**

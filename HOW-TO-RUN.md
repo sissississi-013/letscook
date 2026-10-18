@@ -21,6 +21,12 @@ Full checklist: [glove-setup.md](glove-setup.md). In short:
 
 If no glove stream arrives, you play with the mouse: hold the left button to pinch with the right hand, the right button for the left hand.
 
+## 2a. No gloves? Use your webcam as the gloves
+```bash
+.venv/bin/python hand_cam.py
+```
+MediaPipe tracks all 21 points of both hands and sends them in the gloves' own format (to the game, the logger and the wrist anchors), so everything works as if you were wearing Smartgloves. Hold your hands up to the webcam, **palms facing the screen, fingers up**: in the game that's palms down over the counter. Move your hands around the image to move them around the kitchen; **pinch thumb and index** to grab. macOS will ask to allow camera access for Terminal.
+
 ## 2b. (Optional) Move your hands with the webcam
 ```bash
 .venv/bin/python wrist_cam.py
