@@ -43,7 +43,8 @@ MediaPipe tracks all 21 points of both hands and sends them in the gloves' own f
 
 | Key | What it does |
 |---|---|
-| Left / right mouse button (no gloves) | hold to close the right / left hand (pinch-grab); release to let go |
+| Mouse (no gloves) | the **right hand follows the cursor** over the counter; **scroll** = up/down; **hold left button** to pinch-grab, release to drop |
+| Right mouse button (no gloves) | hold to pinch with the left hand (move it with WASD / Q E) |
 | W A S D | move hands across the counter (when the wrist cam isn't running) |
 | Q / E | hands down / up |
 | Z / C | turn hands |

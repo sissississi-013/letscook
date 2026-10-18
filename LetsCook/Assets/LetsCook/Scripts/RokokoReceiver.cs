@@ -48,10 +48,10 @@ namespace LetsCook
 
         public string Status => IsLive ? $"LIVE gloves ({latest.source}) · {packets} packets"
             : injected != null ? "injected frame"
-            : MouseHands ? "no gloves: hold left mouse = right hand grab, right mouse = left hand grab"
+            : MouseHands ? "no gloves: mouse moves the right hand (scroll = height), hold left button to grab · right button = left hand grab"
             : "mock hands (no glove stream on :" + port + ")";
 
-        bool MouseHands => mouseHandsWhenSilent && Application.isPlaying && !IsLive && injected == null;
+        public bool MouseHands => mouseHandsWhenSilent && Application.isPlaying && !IsLive && injected == null;
 
         /// Only real (or injected) glove data moves things. The idle mock animation is a ghost, so it can't
         /// knock the kitchen over while nobody is wearing the gloves.

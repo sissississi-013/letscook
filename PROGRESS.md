@@ -181,3 +181,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 
 ### 17:52 Glass cooktop ✅
 - The burner now sits in a charcoal glass hob (visual only; the burner collider and heat logic are unchanged). `shots/m16-hob.png`.
+
+### 17:53 Mouse play ✅ (needs a hands-on try)
+- No gloves: the right hand follows the mouse cursor over the counter, placed so its thumb–index pinch point lands under the cursor; scroll wheel raises/lowers it; left button pinches. The left hand keeps WASD/QE + right button. HUD explains it.
+- Tests 33/33 still pass; mouse movement itself can't be simulated in batch mode.
