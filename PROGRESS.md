@@ -198,3 +198,6 @@
 - Mac rejoined xTribe_IoT (10.10.10.30) so the gloves can reach Studio again.
 - Fixed a flaky shaker test (picked a leftover bread from another test's kitchen).
 - Evidence: EditMode 17/17 incl. bone-name mapping; PlayMode 18/18; replay round trip 30/30 packets. **Not yet run on a real Rokoko FBX** (bone naming in Studio's export is assumed; the importer reports the bone names it found if none match).
+
+### 18:18 USB question
+- The gloves enumerate as USB serial ports (`/dev/cu.usbmodem5`, `/dev/cu.usbmodemBD5B7DDEDEAD1`); Studio uses them for Wi-Fi setup. Rokoko's Device SDK officially streams Smartgloves II over USB, but the wire protocol is proprietary and undocumented. **Claude's call:** not reverse-engineering it (multi-day, and it works around Rokoko's paid SDK). Supported routes: Device SDK / Studio Plus for live data, or the free record → FBX → `TakeImporter` → `replay_take.py` path.
