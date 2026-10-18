@@ -1,5 +1,22 @@
 # Progress
 
+## Handoff (2026-10-17, end of the 14:45–18:30 build)
+
+**What works now (all tested):**
+- **Glove pipeline:** Rokoko Studio → JSON v4 over UDP → Unity (port 14045) + raw logger (14043). `mock_glove.py` fakes gloves; `glove_check.py` shows live finger bars. Real gloves: the right glove reached Studio over **xTribe_IoT** (66 fps); see glove-setup.md.
+- **The game** (Unity 6, `LetsCook/`, scene `Assets/Scenes/Kitchen.unity`, or `build/LetsCook.app`): textured kitchen with smooth models; glove-driven hands with assisted pinch grasp; knife cutting; continuous cooking (water boil-off, browning, char, egg setting, butter melting); egg cracking; salt, pepper and oil (pan coating, smoke point); sizzle/chop sounds; **T** asks for any tool (library or Claude-designed); **Enter** serves → Claude names the dish, picks the course, unlocks a personal next recipe; cookbook page with photos (`cookbook/index.html`); **R** resets; **K** recalibrates gloves via Studio; webcam wrist tracking (`wrist_cam.py`, untested with a real camera); opt-in consent before recording.
+- **Robot data:** 30 fps session logs + frame-aligned ego/agentview video → `tools/to_lerobot.py` (LeRobot v2.1 layout: 140-d hand state, next-frame actions, object poses, contacts, held objects, assist/mock flags, per-episode clips) → `tools/retarget.py` (LEAP hand joint targets via dex-retargeting).
+- Tests: Unity EditMode 16 + PlayMode 17, pytest 34, robot tests 2. All passing at handoff.
+
+**How to run:** see [HOW-TO-RUN.md](HOW-TO-RUN.md). Short version: `./start.sh` (or `./start.sh --mock`), open the Unity project, press Play.
+
+**Blocked / needs you:**
+1. **Gloves:** finish Wi-Fi for both (xTribe_IoT, Receiver IP = Mac's IP on it, e.g. 10.10.10.30), create a scene + actor, calibrate. Then **start the Plus/Pro trial** (Starter plan can't stream out) and add Custom Streaming receivers 127.0.0.1:14043 and :14045, JSON v4.
+2. **Claude API key** in ~/.zshrc returns 401: dish names/tool designs fall back to offline placeholders until it's replaced.
+3. Real-glove tuning still untested: hand orientation (Z/C to turn), grasp thresholds (0.3/0.2 curl), wrist cam with gloves on.
+
+**Next ideas:** real hand mesh; liquids (Obi Fluid) and pouring sauces; voice tool requests beyond dictation; text-to-3D upgrade for generated tools; MANO export; multi-player session IDs for an event.
+
 Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](RALPH.md).
 
 ## Milestones
