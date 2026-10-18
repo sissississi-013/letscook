@@ -175,3 +175,6 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - User gave their Rokoko licence to a participant, so no live Studio streaming for now. **Claude's call:** not driving the gloves through Studio's internal device driver to bypass the subscription; options documented (Device SDK, recorded-take import, webcam hands).
 - Pushed to https://github.com/sissississi-013/letscook (public).
 - Evidence: Unity 33/33 (incl. mouse-hands defaults), pytest 39/39 (mapping, v4 names, receiver decodes the frame, per-hand parents, wrist mapping). **Webcam hands not yet tried with a real camera.**
+
+### 17:51 Better models ✅
+- `Shapes.Extrude` (convex outline → solid, flat-shaded sides, handedness-aware winding) + `RoundedRect`: sandwich-bread slice with a domed crown, rounded butter block, chef's knife blade with curved belly and point, rounded handles (knife, spatula, pan) and spatula head. Visual meshes only; colliders unchanged. `shots/m15-models.png`.

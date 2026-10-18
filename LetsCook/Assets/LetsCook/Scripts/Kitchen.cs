@@ -85,6 +85,13 @@ namespace LetsCook
             SwapMesh(root, "Onion", Shapes.Onion());
             SwapMesh(root, "Egg", Shapes.Egg());
             SwapMesh(root, "Plate", Shapes.Plate());
+            SwapMesh(root, "Bread", Shapes.BreadSlice());
+            SwapMesh(root, "Butter", Shapes.ButterBlock());
+            SwapMesh(root, "Knife/Knife Blade", Shapes.KnifeBlade());
+            SwapMesh(root, "Knife/Knife Handle", Shapes.RoundedSlab());
+            SwapMesh(root, "Spatula/Spatula Head", Shapes.RoundedSlab());
+            SwapMesh(root, "Spatula/Spatula Handle", Shapes.RoundedSlab());
+            SwapMesh(root, "Pan/Pan Handle", Shapes.RoundedSlab());
             var tomato = root.Find("Tomato");
             if (tomato != null)
             {

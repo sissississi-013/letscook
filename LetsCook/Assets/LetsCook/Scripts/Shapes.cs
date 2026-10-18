@@ -53,6 +53,87 @@ namespace LetsCook
             return pts;
         }
 
+        /// Extrude a convex 2D outline (counter-clockwise, unit box space -0.5..0.5) into a solid with flat-shaded
+        /// sides. axes: which local axes the outline's (a, b) map to; the remaining axis is the thickness.
+        public static Mesh Extrude(string name, IList<Vector2> outline, int axisA, int axisB)
+        {
+            if (cache.TryGetValue(name, out var cached) && cached != null) return cached;
+            int axisC = 3 - axisA - axisB;
+            Vector3 P(Vector2 p, float c) { var v = Vector3.zero; v[axisA] = p.x; v[axisB] = p.y; v[axisC] = c; return v; }
+            // Orientation: does (A × B) point along +C? If not, flip the winding so faces point outwards.
+            var axA = Vector3.zero; axA[axisA] = 1; var axB = Vector3.zero; axB[axisB] = 1; var axC = Vector3.zero; axC[axisC] = 1;
+            bool flip = Vector3.Dot(Vector3.Cross(axA, axB), axC) > 0;   // Unity is left-handed: clockwise faces are front faces
+
+            var verts = new List<Vector3>(); var uvs = new List<Vector2>(); var tris = new List<int>();
+            void Tri(int a, int b, int c) { if (flip) tris.AddRange(new[] { a, c, b }); else tris.AddRange(new[] { a, b, c }); }
+            Vector2 centre = Vector2.zero; foreach (var p in outline) centre += p; centre /= outline.Count;
+            foreach (float c in new[] { 0.5f, -0.5f })
+            {
+                int start = verts.Count;
+                verts.Add(P(centre, c)); uvs.Add(centre + Vector2.one * 0.5f);
+                foreach (var p in outline) { verts.Add(P(p, c)); uvs.Add(p + Vector2.one * 0.5f); }
+                for (int i = 0; i < outline.Count; i++)
+                {
+                    int a = start + 1 + i, b = start + 1 + (i + 1) % outline.Count;
+                    if (c > 0) Tri(start, b, a); else Tri(start, a, b);
+                }
+            }
+            for (int i = 0; i < outline.Count; i++)
+            {
+                var p0 = outline[i]; var p1 = outline[(i + 1) % outline.Count];
+                int s0 = verts.Count;
+                verts.Add(P(p0, 0.5f)); verts.Add(P(p1, 0.5f)); verts.Add(P(p1, -0.5f)); verts.Add(P(p0, -0.5f));
+                float u0 = (float)i / outline.Count, u1 = (float)(i + 1) / outline.Count;
+                uvs.Add(new Vector2(u0, 1)); uvs.Add(new Vector2(u1, 1)); uvs.Add(new Vector2(u1, 0)); uvs.Add(new Vector2(u0, 0));
+                Tri(s0, s0 + 1, s0 + 2); Tri(s0, s0 + 2, s0 + 3);
+            }
+            var mesh = new Mesh { name = name };
+            mesh.SetVertices(verts); mesh.SetUVs(0, uvs); mesh.SetTriangles(tris, 0);
+            mesh.RecalculateNormals(); mesh.RecalculateTangents(); mesh.RecalculateBounds();
+            cache[name] = mesh;
+            return mesh;
+        }
+
+        /// Rounded rectangle filling the unit square, corner radius r (fraction of the side).
+        public static List<Vector2> RoundedRect(float r, int perCorner = 5)
+        {
+            var pts = new List<Vector2>();
+            var corners = new[] { new Vector2(0.5f - r, -0.5f + r), new Vector2(0.5f - r, 0.5f - r), new Vector2(-0.5f + r, 0.5f - r), new Vector2(-0.5f + r, -0.5f + r) };
+            for (int c = 0; c < 4; c++)
+                for (int i = 0; i <= perCorner; i++)
+                {
+                    float a = (c * 90f - 90f + 90f * i / perCorner) * Mathf.Deg2Rad;
+                    pts.Add(corners[c] + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r);
+                }
+            return pts;
+        }
+
+        /// Sandwich-bread slice seen from above (outline in XZ): squared bottom, domed crown.
+        public static Mesh BreadSlice()
+        {
+            var pts = new List<Vector2> { new Vector2(-0.45f, -0.5f), new Vector2(0.45f, -0.5f), new Vector2(0.5f, -0.45f), new Vector2(0.5f, 0.12f) };
+            for (int i = 0; i <= 10; i++)
+            {
+                float a = Mathf.PI * i / 10f;   // the crown: two lobes like a real loaf top
+                pts.Add(new Vector2(0.5f * Mathf.Cos(a), 0.12f + 0.38f * Mathf.Sin(a) * (1f - 0.08f * Mathf.Sin(2f * a))));
+            }
+            pts.Add(new Vector2(-0.5f, -0.45f));
+            return Extrude("breadSlice", pts, 0, 2);
+        }
+
+        /// Butter block with softened edges (outline in XZ).
+        public static Mesh ButterBlock() => Extrude("butter", RoundedRect(0.12f), 0, 2);
+
+        /// Chef's knife blade (outline in XY, thin along Z): straight spine, curved belly, pointed tip on +X.
+        public static Mesh KnifeBlade() => Extrude("knifeBlade", new List<Vector2>
+        {
+            new Vector2(-0.5f, -0.5f), new Vector2(0.15f, -0.5f), new Vector2(0.32f, -0.42f), new Vector2(0.43f, -0.25f),
+            new Vector2(0.5f, 0.45f), new Vector2(0.42f, 0.5f), new Vector2(-0.5f, 0.5f),
+        }, 0, 1);
+
+        /// Rounded tool head/handle (outline in XZ).
+        public static Mesh RoundedSlab() => Extrude("roundedSlab", RoundedRect(0.3f), 0, 2);
+
         // ---- food (unit sphere space: radius 0.5) -------------------------------------------------------
 
         /// Egg: blunt bottom, narrower top.
