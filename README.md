@@ -1,8 +1,20 @@
 # let's cook! 🍳🧤
 
-A free-play cooking sandbox played with Rokoko Smartgloves. Every motion you make is quietly saved as human hand-motion data for training robots to cook.
+A free-play cooking sandbox you play with your hands: Rokoko Smartgloves, your webcam, or just the mouse. Cook anything: slice, crack eggs, oil the pan, season, toast, burn things. When you serve a plate, Claude names the dish, decides which course it is, and unlocks a personal next recipe. Need a tool that isn't there? Ask for it and it appears. Every motion can (with your consent) be saved as hand-motion data for training robots to cook.
 
-Started 2026-10-17.
+![The kitchen](shots/m16-hob.png)
+
+**Quick start**
+```bash
+python3 -m venv .venv && .venv/bin/pip install lz4 pytest numpy pyarrow anthropic mediapipe opencv-python
+./start.sh                       # logger + chef server (Claude; needs ANTHROPIC_API_KEY)
+.venv/bin/python hand_cam.py     # optional: play with your webcam instead of gloves
+```
+Then open `LetsCook/` in Unity 6 (6000.2.9f1), open `Assets/Scenes/Kitchen.unity` and press Play, or build the app with `./unity.sh app`. Full guide: [HOW-TO-RUN.md](HOW-TO-RUN.md).
+
+**Under the hood:** continuous cooking physics (surface water boils off before browning, Maillard browning above 140 °C, charring above 180 °C, egg proteins set at 62 °C, butter melts, oil smokes at 230 °C) · physics hands with assisted pinch grasp · knife cutting · robot-learning export (LeRobot-style dataset with 140-d hand state, object poses, contacts, frame-aligned video) · retargeting onto the LEAP robot hand.
+
+Built on 2026-10-17.
 
 ## Start here
 - [HOW-TO-RUN.md](HOW-TO-RUN.md): start the helpers, stream the gloves, play, export robot data
