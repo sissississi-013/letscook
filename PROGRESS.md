@@ -147,3 +147,7 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 - **Retargeting**: `tools/retarget.py` (separate `.venv-robot`, Python 3.12, dex_retargeting + CPU torch; LEAP URDF from dexsuite/dex-urdf, MIT) adds `action.retargeted.leap_left/right` (16 joints) per frame, using dex-retargeting's own frame estimate + MANO operator rotation and DexPilot config.
 - Evidence: Unity tests pass; `tests_robot` 2/2 (frame orthonormal + right-handed; fist bends the LEAP joints more than an open hand).
 - Gloves: Studio detects **both gloves over USB** ("Device is not yet connected to Wi-Fi"); user is updating Studio to 2.6.2.7 and doing Wi-Fi setup.
+
+### 17:27 Real gloves: first Wi-Fi connection ✅
+- After updating Studio to 2.6.2.7 and several failed networks (iPhone hotspots invisible to the gloves, error 607), the **right glove joined xTribe_IoT and streamed to Studio at 66 frames/s** (Studio log 17:25:21), then dropped at 17:26 (likely unplugged with no power bank). Details in glove-setup.md.
+- Still to do with the user: power both gloves, set up the left glove, create a scene + actor, calibrate, start the Plus/Pro trial (Starter plan can't stream out), add Custom Streaming receivers 14043/14045, then `glove_check.py`.

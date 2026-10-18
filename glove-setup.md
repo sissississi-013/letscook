@@ -29,6 +29,15 @@ Source: Rokoko's "Getting Started with your Smartgloves II" + OptiTrack's setup 
 13. [ ] Run the Python receiver (`receiver.py`) to confirm data arrives
 14. [ ] Download the JSON format .txt files from the Custom Streaming support article into this folder
 
+## What actually worked (2026-10-17, xTribe coworking space)
+- Studio 2.6.2.0 → updated to 2.6.2.7 first. Studio saw both gloves over USB ("Device is not yet connected to Wi-Fi → Setup").
+- **Error 607 "No Access Point found"** with iPhone hotspots: the gloves never saw them in their scan (a hotspot with a Chinese name, a renamed `letscook` one at 2.4 GHz ch 6, and a friend's at 5 GHz ch 149). Don't use non-ASCII Wi-Fi names.
+- **xTribe Guest**: visible to the gloves but a guest network (likely client isolation); skipped.
+- **xTribe_IoT (2.4 GHz, ch 11, WPA2) worked.** Mac joined too (IP 10.10.10.30), glove settings: xTribe_IoT + password, Receiver IP = the Mac's IP on that network (it turns green in Studio when it matches), WPA2, 2.4 GHz → "Added Wi-Fi device: Actor 2 Right", 66 frames/s.
+- **The Receiver IP must be the Mac's IP on the same network.** Studio may suggest a stale one (orange); restart Studio after the Mac changes networks.
+- A glove unplugged from USB without a power bank switches off and drops out.
+- Studio's log (`~/Library/Application Support/com.RokokoElectronics.RokokoStudio/Production/logs/studio.log`) shows "Added Wi-Fi device" / "device disconnected" lines: handy to check connection without the UI.
+
 ## Troubleshooting
 - Gloves don't appear → try a phone hotspot; check the Mac and gloves are on the same network; check the macOS firewall isn't blocking Studio
 - Drift → recalibrate between sessions
