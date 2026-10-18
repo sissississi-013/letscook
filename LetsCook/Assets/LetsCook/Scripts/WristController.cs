@@ -22,7 +22,7 @@ namespace LetsCook
         RokokoReceiver receiver;
         Camera cam;
         /// Where the right hand's thumb–index pinch sits relative to its wrist (from the mock pinch pose).
-        static readonly Vector3 RightPinchOffset = new Vector3(-0.031f, -0.063f, 0.0835f);
+        public static readonly Vector3 RightPinchOffset = new Vector3(-0.031f, -0.063f, 0.0835f);
 
         void Update()
         {
