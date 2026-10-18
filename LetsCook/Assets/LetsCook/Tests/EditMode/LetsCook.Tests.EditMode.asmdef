@@ -1,11 +1,22 @@
 {
   "name": "LetsCook.Tests.EditMode",
-  "references": ["LetsCook", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
-  "includePlatforms": ["Editor"],
+  "references": [
+    "LetsCook",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner",
+    "LetsCook.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": true,
-  "precompiledReferences": ["nunit.framework.dll"],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
   "autoReferenced": false,
-  "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
 }

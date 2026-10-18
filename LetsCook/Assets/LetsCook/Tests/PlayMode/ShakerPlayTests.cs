@@ -14,7 +14,7 @@ namespace LetsCook.Tests
 
         static (Shaker shaker, Rigidbody rb) Salt()
         {
-            var s = Object.FindObjectsByType<Shaker>(FindObjectsSortMode.None).First(x => x.seasoning == "salt");
+            var s = Object.FindObjectsByType<Shaker>(FindObjectsSortMode.None).First(x => x.seasoning == "salt" && x.gameObject.scene.IsValid());
             return (s, s.GetComponent<Rigidbody>());
         }
 
@@ -29,7 +29,7 @@ namespace LetsCook.Tests
         [UnityTest]
         public IEnumerator ShakingUpsideDownOverBreadSaltsIt()
         {
-            var bread = Food.All.First(f => f.ingredient == "bread");
+            var bread = kitchen.GetComponentsInChildren<Food>().First(f => f.ingredient == "bread");   // not a leftover from another test
             var (shaker, rb) = Salt();
             rb.isKinematic = true;   // hold it like a hand would
             rb.position = bread.transform.position + Vector3.up * 0.2f;

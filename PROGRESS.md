@@ -189,3 +189,10 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 
 ### 17:58 Real cut faces ✅
 - Cutting a whole tomato or onion turns both pieces into hemispheres (`Shapes.HalfRound`, built in the halved piece's unit space, 6 axis/side variants) with a second submesh for the cut face in a flesh material (tomato: light red-pink; onion: creamy white). The stem hides. Food recolouring now keeps extra material slots. `shots/m17-cut.png` shows two halves cut-side up.
+
+### 18:05 Real glove data on the free plan: FBX take importer + replay ✅ (needs a real take)
+- `TakeImporter.cs` (Unity editor menu + batch method): copies a Rokoko Studio FBX export into the project, samples its animation clip frame by frame, maps bones to Rokoko JSON v4 names (Rokoko/Newton names, namespaced names, or Mixamo-style `LeftHandIndex1`…), and writes `sessions/take-<name>.jsonl` in receiver.py's format with world positions, rotations and parents.
+- `replay_take.py` sends any recorded session (imported takes or receiver.py logs) to the game at recorded timing, optionally looping.
+- Mac rejoined xTribe_IoT (10.10.10.30) so the gloves can reach Studio again.
+- Fixed a flaky shaker test (picked a leftover bread from another test's kitchen).
+- Evidence: EditMode 17/17 incl. bone-name mapping; PlayMode 18/18; replay round trip 30/30 packets. **Not yet run on a real Rokoko FBX** (bone naming in Studio's export is assumed; the importer reports the bone names it found if none match).

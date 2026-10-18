@@ -21,6 +21,12 @@ Full checklist: [glove-setup.md](glove-setup.md). In short:
 
 If no glove stream arrives, you play with the mouse: hold the left button to pinch with the right hand, the right button for the left hand.
 
+## 2c. Real gloves on the free Rokoko plan: record → import → replay
+The free Starter plan can't live-stream, but it can record and export. Your real glove sensor data still drives the game and the robot data:
+1. In Rokoko Studio, record a take with the gloves on, then export it as **FBX**.
+2. In Unity: menu **Let's Cook → Import Rokoko FBX Take…** and pick the file (or batch: `Unity -batchmode -quit -projectPath LetsCook -executeMethod LetsCook.EditorTools.TakeImporter.Import -fbx /path/take.fbx`). This writes `sessions/take-<name>.jsonl` (all hand bones per frame, JSON v4).
+3. Press Play in Unity (Y to record), then replay the take into the game as if the gloves were live: `.venv/bin/python replay_take.py sessions/take-<name>.jsonl` (`--loop` to repeat).
+
 ## 2a. No gloves? Use your webcam as the gloves
 ```bash
 .venv/bin/python hand_cam.py
