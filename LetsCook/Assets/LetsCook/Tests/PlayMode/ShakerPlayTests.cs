@@ -12,9 +12,9 @@ namespace LetsCook.Tests
         [SetUp] public void SetUp() => kitchen = Kitchen.Build();
         [TearDown] public void TearDown() => Object.Destroy(kitchen.gameObject);
 
-        static (Shaker shaker, Rigidbody rb) Salt()
+        (Shaker shaker, Rigidbody rb) Salt()
         {
-            var s = Object.FindObjectsByType<Shaker>(FindObjectsSortMode.None).First(x => x.seasoning == "salt" && x.gameObject.scene.IsValid());
+            var s = kitchen.GetComponentsInChildren<Shaker>().First(x => x.seasoning == "salt");
             return (s, s.GetComponent<Rigidbody>());
         }
 
