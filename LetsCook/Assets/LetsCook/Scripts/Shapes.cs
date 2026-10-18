@@ -131,6 +131,9 @@ namespace LetsCook
             new Vector2(0.5f, 0.45f), new Vector2(0.42f, 0.5f), new Vector2(-0.5f, 0.5f),
         }, 0, 1);
 
+        /// Glass hob: nearly square corners (outline in XZ).
+        public static Mesh HobSlab() => Extrude("hobSlab", RoundedRect(0.07f), 0, 2);
+
         /// Rounded tool head/handle (outline in XZ).
         public static Mesh RoundedSlab() => Extrude("roundedSlab", RoundedRect(0.3f), 0, 2);
 

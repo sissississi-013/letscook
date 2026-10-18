@@ -178,3 +178,6 @@ Ralph loop started 2026-10-17 14:45 PDT, deadline 18:30 PDT. Brief: [RALPH.md](R
 
 ### 17:51 Better models ✅
 - `Shapes.Extrude` (convex outline → solid, flat-shaded sides, handedness-aware winding) + `RoundedRect`: sandwich-bread slice with a domed crown, rounded butter block, chef's knife blade with curved belly and point, rounded handles (knife, spatula, pan) and spatula head. Visual meshes only; colliders unchanged. `shots/m15-models.png`.
+
+### 17:52 Glass cooktop ✅
+- The burner now sits in a charcoal glass hob (visual only; the burner collider and heat logic are unchanged). `shots/m16-hob.png`.

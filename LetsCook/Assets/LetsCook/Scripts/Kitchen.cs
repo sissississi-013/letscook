@@ -104,6 +104,20 @@ namespace LetsCook
                 stem.GetComponent<Renderer>().sharedMaterial = Mat("stem", new Color(0.25f, 0.45f, 0.15f), 0.3f);
             }
 
+            var burner = root.Find("Burner");
+            if (burner != null)
+            {
+                burner.GetComponent<Renderer>().enabled = false;
+                var hob = new GameObject("Hob Glass");
+                hob.transform.SetParent(root, false);
+                hob.transform.position = burner.position + new Vector3(0.02f, -0.002f, 0.01f);
+                hob.transform.localScale = new Vector3(0.42f, 0.008f, 0.36f);
+                hob.AddComponent<MeshFilter>().sharedMesh = Shapes.HobSlab();
+                hob.AddComponent<MeshRenderer>().sharedMaterial = Mat("hobGlass", new Color(0.16f, 0.16f, 0.18f), 0.9f, 0.1f);
+                var ring = burner.Find("Burner Ring");
+                if (ring != null) ring.localScale = new Vector3(ring.localScale.x * 1.1f, ring.localScale.y, ring.localScale.z * 1.1f);
+            }
+
             var iron = Mat("castIron", new Color(0.16f, 0.16f, 0.17f), 0.55f, 0.45f);
             Visual(root.Find("Pan"), Shapes.Pan(), iron, new Vector3(0f, -0.004f, 0f), keep: "Pan Handle");
             Visual(root.Find("Bowl"), Shapes.Bowl(), Mat("bowlGlaze", new Color(0.32f, 0.52f, 0.78f), 0.85f), new Vector3(0f, -0.005f, 0f));
