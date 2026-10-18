@@ -201,3 +201,8 @@
 
 ### 18:18 USB question
 - The gloves enumerate as USB serial ports (`/dev/cu.usbmodem5`, `/dev/cu.usbmodemBD5B7DDEDEAD1`); Studio uses them for Wi-Fi setup. Rokoko's Device SDK officially streams Smartgloves II over USB, but the wire protocol is proprietary and undocumented. **Claude's call:** not reverse-engineering it (multi-day, and it works around Rokoko's paid SDK). Supported routes: Device SDK / Studio Plus for live data, or the free record → FBX → `TakeImporter` → `replay_take.py` path.
+
+### 18:35 Direct USB probe (user asked)
+- Quit Studio to free the ports. The gloves are USB CDC serial devices, "Rokoko Electronics", VID 1155 (0x0483, STMicro) / PID 22336 (0x5740, STM32 virtual COM), serial BD5B7DDEDEAD (+ a second port `usbmodem5`).
+- Passive read (`usb_probe/probe.py`): `usbmodemBD5B7DDEDEAD1` opens but sends **0 bytes** in 3 s, so the glove doesn't stream until it gets a command. `usbmodem5` won't open (stuck after Studio let go; replugging should clear it).
+- Going further means learning Rokoko's command protocol (their driver speaks "RCSP"/"RGMP v2"), which isn't documented. Blind-sending commands risks corrupting the glove's settings (the same port is used to write its Wi-Fi configuration). Stopped here; the supported paths are Studio (live view, record → FBX → TakeImporter) or the Device SDK.
