@@ -34,7 +34,7 @@ namespace LetsCook
             Physical(Pan(root, new Vector3(0.32f, CounterTop + 0.02f, 0.5f)), 1.0f);
             Physical(Bowl(root, new Vector3(0.02f, CounterTop + 0.005f, 0.66f)), 0.5f);
 
-            var plate = Disc(root, "Plate", new Vector3(-0.5f, CounterTop + 0.006f, 0.6f), 0.13f, 0.012f, Mat("ceramic", new Color(0.97f, 0.97f, 0.95f), 0.8f));
+            var plate = Disc(root, "Plate", new Vector3(-0.5f, CounterTop + 0.006f, 0.6f), 0.13f, 0.012f, Mat("ceramic", new Color(0.86f, 0.84f, 0.8f), 0.55f));
             Physical(plate, 0.5f); Tag(plate, "plate", ItemKind.Container);
 
             Physical(Knife(root, new Vector3(-0.17f, CounterTop + 0.03f, 0.27f)), 0.15f);
