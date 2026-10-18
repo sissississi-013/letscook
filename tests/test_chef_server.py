@@ -106,4 +106,6 @@ def test_latest_unlock_endpoint():
     assert json.loads(urlopen(url).read()) == {}
     chef_server.name_dish(SUMMARY, client=fake_client(reply=DISH))
     assert json.loads(urlopen(url).read())["recipe_name"] == "Eggy Bread"
+    chef_server.name_dish(SUMMARY, client=fake_client(error=RuntimeError("down")))   # offline placeholder
+    assert json.loads(urlopen(url).read())["recipe_name"] == "Eggy Bread", "offline names don't replace the idea"
     server.shutdown()

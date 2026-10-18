@@ -316,8 +316,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/cookbook":
             return self._send(200, load_cookbook())
         if self.path == "/latest-unlock":
-            book = load_cookbook()
-            return self._send(200, (book[-1]["dish"].get("unlock") or {}) if book else {})
+            real = [d for d in load_cookbook() if not d["dish"].get("offline")]   # placeholders aren't real ideas
+            return self._send(200, (real[-1]["dish"].get("unlock") or {}) if real else {})
         if self.path == "/health":
             return self._send(200, {"ok": True})
         self._send(404, {"error": "not found"})
